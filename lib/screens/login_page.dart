@@ -30,26 +30,51 @@ class _LoginPageState extends State<LoginPage> {
           // Incorrect password
           showDialog(
             context: context,
-            builder: (context) =>
-                AlertDialog(
-                  title: Text('Login Failed'),
-                  content: Text('Incorrect password.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('OK'),
-                    ),
-                  ],
+            builder: (context) => AlertDialog(
+              title: Text(
+                'Login Failed',
+                style: TextStyle(color: Colors.black), // Apply black color to title
+              ),
+              content: Text(
+                'Incorrect Password.',
+                style: TextStyle(color: Colors.black), // Apply black color to content
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'OK',
+                    style: TextStyle(color: Colors.black), // Apply black color to button text
+                  ),
                 ),
+              ],
+            ),
           );
         }
       } else {
-        // Account does not exist, redirect to signup page
-        Navigator.push(
-          context, // Add the context here
-          MaterialPageRoute(builder: (context) => SignupPage()),
-        );
-      }
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(
+                'Login Failed',
+                style: TextStyle(color: Colors.black), // Apply black color to title
+              ),
+              content: Text(
+                'Invalid Credentials.',
+                style: TextStyle(color: Colors.black), // Apply black color to content
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'OK',
+                    style: TextStyle(color: Colors.black), // Apply black color to button text
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
     } catch (e) {
       print('Error during login: $e');
       // Handle login errors
