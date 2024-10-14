@@ -69,139 +69,155 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // Transparent background
-      extendBodyBehindAppBar: true, // Extend body behind the app bar
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Login', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent, // Transparent AppBar
-        elevation: 0, // No shadow
-        systemOverlayStyle: SystemUiOverlayStyle.light, // Light status bar icons
-        iconTheme: IconThemeData(color: Colors.white), // White back arrow
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
+          // Background image
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/background3.png'), // Background image
+                image: AssetImage('assets/background3.png'), // Your background image
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    // Username field
-                    TextFormField(
-                      controller: _usernameController,
-                      decoration: InputDecoration(
-                        labelText: 'Username',
-                        labelStyle: TextStyle(color: Colors.white),
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25), // Rounded corners
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Background blur
+                child: Container(
+                  width: 350, // Adjust the width of the form
+                  padding: EdgeInsets.all(20), // Add padding inside the form
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3), // Slightly transparent background
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        spreadRadius: 5,
+                        offset: Offset(0, 10),
                       ),
-                      style: TextStyle(color: Colors.white),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your username';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16), // Add space between fields
-
-                    // Password field
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        labelStyle: TextStyle(color: Colors.white),
-                      ),
-                      obscureText: true,
-                      style: TextStyle(color: Colors.white),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20), // Space before buttons
-
-                    // Buttons Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    ],
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Login Button
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                                ),
-                                child: InkWell(
-                                  onTap: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      _login(); // Login logic
-                                    }
-                                  },
-                                  child: Center(
-                                    child: Text(
-                                      'Login',
-                                      style: TextStyle(color: Colors.white, fontSize: 16),
-                                    ),
-                                  ),
-                                ),
+                        // Title "Login"
+                        Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(height: 20), // Space between title and fields
+
+                        // Username TextField
+                        TextFormField(
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            labelText: 'Username',
+                            prefixIcon: Icon(Icons.person, color: Colors.black),
+                            labelStyle: TextStyle(color: Colors.black),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.8), // Light background inside the field
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          style: TextStyle(color: Colors.black),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your username';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16), // Space between fields
+
+                        // Password TextField
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: Icon(Icons.lock, color: Colors.black),
+                            labelStyle: TextStyle(color: Colors.black),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.8), // Light background inside the field
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          obscureText: true,
+                          style: TextStyle(color: Colors.black),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 24), // Space between field and button
+
+                        // Login button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                _login(); // Call login function
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: Colors.grey[400], // Button background color
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
                               ),
+                            ),
+                            child: Text(
+                              'Login',
+                              style: TextStyle(color: Colors.black, fontSize: 18),
                             ),
                           ),
                         ),
-                        SizedBox(width: 20), // Space between buttons
+                        SizedBox(height: 16), // Space between login and signup link
 
-                        // Sign Up Button
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                                ),
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => SignupPage(),
-                                      ),
-                                    );
-                                  },
-                                  child: Center(
-                                    child: Text(
-                                      'Sign Up',
-                                      style: TextStyle(color: Colors.white, fontSize: 16),
-                                    ),
-                                  ),
-                                ),
+                        // Sign Up link
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SignupPage(),
                               ),
+                            );
+                          },
+                          child: Text(
+                            "Don't have an account? Register",
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(0.7),
+                              fontSize: 14,
+                              decoration: TextDecoration.underline,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
