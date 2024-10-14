@@ -37,7 +37,7 @@ class _SignupPageState extends State<SignupPage> {
     return Scaffold(
       extendBodyBehindAppBar: true, // Extend the body behind the app bar for transparency
       appBar: AppBar(
-        title: Text('Signup', style: TextStyle(color: Colors.white)),
+        title: Text('Sign Up', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(
