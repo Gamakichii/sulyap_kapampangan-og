@@ -6,6 +6,8 @@ import 'screens/landing_page.dart';
 import 'screens/home_page.dart';
 import 'screens/difficulty_selection_page.dart';
 import 'screens/quiz_page.dart';
+import 'screens/profile_page.dart';
+import 'screens/update_password_page.dart';
 import 'objectbox.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -74,6 +76,12 @@ class SulyapKapampanganApp extends StatelessWidget {
       routes: {
         '/': (context) => LandingPage(),
         '/login': (context) => LoginPage(),
+        '/profile': (context) => ProfilePage(
+          username: ModalRoute.of(context)!.settings.arguments as String,
+        ),
+        '/updatePassword': (context) => UpdatePasswordPage(
+          username: ModalRoute.of(context)!.settings.arguments as String,
+        ),
         '/home': (context) => HomePage(),
         '/difficulty': (context) => DifficultySelectionPage(),
         '/quiz': (context) => QuizPage(),

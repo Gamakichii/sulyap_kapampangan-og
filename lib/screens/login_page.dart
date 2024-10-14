@@ -11,32 +11,33 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
   Future<void> _login() async {
     try {
       final usersCollection = FirebaseFirestore.instance.collection('users');
       final querySnapshot = await usersCollection
-          .where('email', isEqualTo: _emailController.text)
+          .where('username', isEqualTo: _usernameController.text.trim())
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        final userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
-        if (userData['password'] == _passwordController.text) {
-          // Login successful, navigate to the next screen
+        final userData = querySnapshot.docs.first.data();
+
+        if (userData['password'] == _passwordController.text.trim()) {
+          // Login successful - navigate to the HomePage with the username
           print('Login successful');
-          Navigator.pushNamed(context, '/home');
+          Navigator.pushNamed(context, '/home', arguments: _usernameController.text.trim());
         } else {
           // Incorrect password
           _showErrorDialog('Login Failed', 'Incorrect Password.');
         }
       } else {
-        _showErrorDialog('Login Failed', 'Invalid Credentials.');
+        _showErrorDialog('Login Failed', 'User not found.');
       }
     } catch (e) {
       print('Error during login: $e');
-      // Handle login errors
+      _showErrorDialog('Login Failed', 'An unexpected error occurred.');
     }
   }
 
@@ -68,24 +69,22 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // Make background transparent
-      extendBodyBehindAppBar: true, // Extend body to behind the appbar
+      backgroundColor: Colors.transparent, // Transparent background
+      extendBodyBehindAppBar: true, // Extend body behind the app bar
       appBar: AppBar(
         title: Text('Login', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent, // Transparent AppBar
-        elevation: 0, // Remove shadow
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        iconTheme: IconThemeData(
-          color: Colors.white, // Set the back arrow color to white
-        ), // Make status bar icons light
+        elevation: 0, // No shadow
+        systemOverlayStyle: SystemUiOverlayStyle.light, // Light status bar icons
+        iconTheme: IconThemeData(color: Colors.white), // White back arrow
       ),
       body: Stack(
         children: [
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/background3.png'), // Your background image
-                fit: BoxFit.cover, // Cover the entire screen
+                image: AssetImage('assets/background3.png'), // Background image
+                fit: BoxFit.cover,
               ),
             ),
           ),
@@ -96,20 +95,24 @@ class _LoginPageState extends State<LoginPage> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    // Username field
                     TextFormField(
-                      controller: _emailController,
+                      controller: _usernameController,
                       decoration: InputDecoration(
-                        labelText: 'Email',
+                        labelText: 'Username',
                         labelStyle: TextStyle(color: Colors.white),
                       ),
                       style: TextStyle(color: Colors.white),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
+                          return 'Please enter your username';
                         }
                         return null;
                       },
                     ),
+                    SizedBox(height: 16), // Add space between fields
+
+                    // Password field
                     TextFormField(
                       controller: _passwordController,
                       decoration: InputDecoration(
@@ -125,11 +128,13 @@ class _LoginPageState extends State<LoginPage> {
                         return null;
                       },
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 20), // Space before buttons
+
+                    // Buttons Row
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Align buttons evenly
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // Login button
+                        // Login Button
                         Expanded(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(15),
@@ -145,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: InkWell(
                                   onTap: () {
                                     if (_formKey.currentState!.validate()) {
-                                      _login(); // Your login logic here
+                                      _login(); // Login logic
                                     }
                                   },
                                   child: Center(
@@ -159,8 +164,9 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 20), // Add spacing between the two buttons
-                        // Sign Up button
+                        SizedBox(width: 20), // Space between buttons
+
+                        // Sign Up Button
                         Expanded(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(15),
