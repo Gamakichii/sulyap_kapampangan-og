@@ -49,7 +49,7 @@ class LandingPage extends StatelessWidget {
                               Border.all(color: Colors.white.withOpacity(0.2)),
                         ),
                         child: InkWell(
-                          onTap: () => Navigator.pushNamed(context, '/home'),
+                          onTap: () => Navigator.pushNamed(context, '/login'),
                           child: Text(
                             'Tap here to start',
                             style: TextStyle(color: Colors.white, fontSize: 16),

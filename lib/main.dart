@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sulyap_kapampangan/screens/login_page.dart';
 import 'models/quiz_question.dart';
 import 'screens/landing_page.dart';
 import 'screens/home_page.dart';
@@ -71,6 +72,7 @@ class SulyapKapampanganApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => LandingPage(),
+        '/login': (context) => LoginPage(),
         '/home': (context) => HomePage(),
         '/difficulty': (context) => DifficultySelectionPage(),
         '/quiz': (context) => QuizPage(),
