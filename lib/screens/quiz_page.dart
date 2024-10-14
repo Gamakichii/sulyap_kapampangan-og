@@ -22,15 +22,8 @@ class _QuizPageState extends State<QuizPage> {
   String? _difficulty;
 
   @override
-  void initState() {
-    super.initState();
-    // We'll load questions in didChangeDependencies
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // This is called after initState and is safe to access context
     if (_difficulty == null) {
       _difficulty = ModalRoute.of(context)!.settings.arguments as String;
       _loadQuestions();
@@ -79,10 +72,8 @@ class _QuizPageState extends State<QuizPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title:
-              Text('Congratulations!', style: TextStyle(color: Colors.black)),
-          content: Text('You have completed the quiz.',
-              style: TextStyle(color: Colors.black)),
+          title: Text('Congratulations!', style: TextStyle(color: Colors.black)),
+          content: Text('You have completed the quiz.', style: TextStyle(color: Colors.black)),
           actions: [
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.black)),
@@ -133,123 +124,132 @@ class _QuizPageState extends State<QuizPage> {
           child: _randomizedQuestions.isEmpty
               ? Center(child: CircularProgressIndicator())
               : Column(
-                  children: [
-                    AppBar(
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      iconTheme: IconThemeData(color: Colors.white),
-                      title: Text(
-                        'Quiz - $_difficulty',
+            children: [
+              AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                iconTheme: IconThemeData(color: Colors.white),
+                title: Text(
+                  'Quiz - $_difficulty',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(color: Colors.white),
+                ),
+              ),
+              LinearProgressIndicator(value: _progress / 100),
+              SizedBox(height: 10),
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: TextStyle(color: Colors.red, fontSize: 18),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Display the image for the current question with a frame
+                      if (_randomizedQuestions[_currentQuestionIndex].imagePath != null)
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.blueAccent, width: 2), // Frame color and width
+                            borderRadius: BorderRadius.circular(10), // Round the corners
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10), // Round the corners of the image
+                            child: Image.asset(
+                              _randomizedQuestions[_currentQuestionIndex].imagePath!,
+                              height: 200, // Adjust the height as necessary
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      SizedBox(height: 20),
+                      // Display the question text
+                      Text(
+                        _randomizedQuestions[_currentQuestionIndex].question,
                         style: Theme.of(context)
                             .textTheme
-                            .titleLarge
+                            .headlineMedium
                             ?.copyWith(color: Colors.white),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    LinearProgressIndicator(value: _progress / 100),
-                    SizedBox(height: 10),
-                    if (_errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(color: Colors.red, fontSize: 18),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              _randomizedQuestions[_currentQuestionIndex]
-                                  .question,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 20),
-                            ..._randomizedQuestions[_currentQuestionIndex]
-                                .choices
-                                .asMap()
-                                .entries
-                                .map((entry) {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ClipRRect(
+                      SizedBox(height: 20),
+                      ..._randomizedQuestions[_currentQuestionIndex]
+                          .choices
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(15),
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                        sigmaX: 10, sigmaY: 10),
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(15),
-                                        border: Border.all(
-                                            color:
-                                                Colors.white.withOpacity(0.2)),
-                                      ),
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.transparent,
-                                          shadowColor: Colors.transparent,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(15)),
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                        onPressed: () =>
-                                            _checkAnswer(entry.key),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 16, vertical: 8),
-                                          child: Text(
-                                            entry.value,
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 20),
-                                          ),
-                                        ),
-                                      ),
+                                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                ),
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                  onPressed: () => _checkAnswer(entry.key),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    child: Text(
+                                      entry.value,
+                                      style: TextStyle(color: Colors.white, fontSize: 20),
                                     ),
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                          ],
-                        ),
-                      ),
-                    ),
-                    BottomNavigationBar(
-                      backgroundColor: Colors.transparent,
-                      unselectedItemColor: Colors.white70,
-                      selectedItemColor: Colors.white,
-                      items: const [
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.home, color: Colors.white),
-                          label: 'Home',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.lightbulb, color: Colors.white),
-                          label: 'Hint',
-                        ),
-                      ],
-                      onTap: (index) {
-                        if (index == 0) {
-                          Navigator.pushNamed(context, '/home');
-                        } else if (index == 1 && !_hintUsed) {
-                          _useHint();
-                        }
-                      },
-                    ),
-                  ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
                 ),
+              ),
+              BottomNavigationBar(
+                backgroundColor: Colors.transparent,
+                unselectedItemColor: Colors.white70,
+                selectedItemColor: Colors.white,
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home, color: Colors.white),
+                    label: 'Home',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.lightbulb, color: Colors.white),
+                    label: 'Hint',
+                  ),
+                ],
+                onTap: (index) {
+                  if (index == 0) {
+                    Navigator.pushNamed(context, '/home');
+                  } else if (index == 1 && !_hintUsed) {
+                    _useHint();
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

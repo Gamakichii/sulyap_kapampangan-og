@@ -29,6 +29,7 @@ void _populateDatabase() {
       choices: ['Pampáng', 'Lakan', 'Tondo', 'Tagalog'],
       correctAnswer: 'Pampáng',
       difficulty: 'Easy',
+      imagePath: 'assets/car.png',
     ),
     // ... add all your questions here
   ];

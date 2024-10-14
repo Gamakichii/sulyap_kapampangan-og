@@ -20,11 +20,14 @@ class HomePage extends StatelessWidget {
             AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
+              iconTheme: IconThemeData(
+                color: Colors.white, // Set the back arrow color to white
+              ),
               title: Text(
                 'The Kapampangan Language',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                    ),
+                  color: Colors.white,
+                ),
               ),
             ),
             Expanded(
@@ -36,16 +39,16 @@ class HomePage extends StatelessWidget {
                     Text(
                       'Select a difficulty',
                       style:
-                          Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Colors.white,
-                              ),
+                      Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
                     SizedBox(height: 20),
                     Text(
                       'Kapampangan derives from the root word pampáng (\'riverbank\'). The language was previously spoken in the monarchy of Tondo, which was governed by the Lakans. Several Kapampangan dictionaries and grammar books were written during the Spanish colonial period.',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.white,
-                          ),
+                        color: Colors.white,
+                      ),
                     ),
                     SizedBox(height: 20),
                     Expanded(
@@ -100,10 +103,10 @@ class HomePage extends StatelessWidget {
               onPressed: isLocked
                   ? null
                   : () => Navigator.pushNamed(
-                        context,
-                        '/difficulty',
-                        arguments: difficulty,
-                      ),
+                context,
+                '/difficulty',
+                arguments: difficulty,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
