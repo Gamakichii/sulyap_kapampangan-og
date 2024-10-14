@@ -7,61 +7,61 @@ class LandingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/background1.png'),
-            fit: BoxFit.cover,
+      body: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, '/login'),
+        child: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/background1.png'),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Row(
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                ),
-              ),
-              Column(
-                children: [
-                  Text(
-                    'Sulyap Kapampangan',
-                    style: Theme.of(context).textTheme.displayLarge,
-                  ),
-                  Text(
-                    'Pag-Aral at Paggalugad',
-                    style: Theme.of(context).textTheme.displayMedium,
-                  ),
-                  SizedBox(height: 20),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(15),
-                          border:
-                              Border.all(color: Colors.white.withOpacity(0.2)),
-                        ),
-                        child: InkWell(
-                          onTap: () => Navigator.pushNamed(context, '/login'),
-                          child: Text(
-                            'Tap here to start',
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        ),
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       ),
                     ),
+                    Column(
+                      children: [
+                        Text(
+                          'Sulyap Kapampangan',
+                          style: Theme.of(context).textTheme.displayLarge,
+                        ),
+                        Text(
+                          'Pamagaral keng penibatan',
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium!
+                              .copyWith(
+                            fontSize: 16, // Reduced font size
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                      ],
+                    ),
+                    SizedBox(height: 50), // Adjust spacing as needed
+                  ],
+                ),
+                Positioned(
+                  bottom: 49,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Text(
+                      'Tap anywhere to start',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
                   ),
-                ],
-              ),
-              SizedBox(height: 50),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
