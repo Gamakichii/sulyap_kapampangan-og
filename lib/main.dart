@@ -26,14 +26,22 @@ void main() async {
 
 void _populateDatabase() {
   final questions = [
+    // Easy questions (photo only)
     QuizQuestion(
-      question: 'What is the root word of the Kapampangan language?',
-      choices: ['Pampáng', 'Lakan', 'Tondo', 'Tagalog'],
-      correctAnswer: 'Pampáng',
+      choices: ['Kotsi', 'Catsi', 'Kutse', 'Carsi'],
+      correctAnswer: 'Kotsi',
       difficulty: 'Easy',
       imagePath: 'assets/car.png',
     ),
-    // ... add all your questions here
+    // Medium questions (photo + question text)
+    QuizQuestion(
+      question: 'What is the Kapampangan word for "Car"?',
+      choices: ['Kotsi', 'Catsi', 'Kutse', 'Carsi'],
+      correctAnswer: 'Kotsi',
+      difficulty: 'Medium',
+      imagePath: 'assets/car.png',
+    ),
+    // Add more questions here...
   ];
 
   objectbox.quizQuestionBox.putMany(questions);
@@ -77,11 +85,11 @@ class SulyapKapampanganApp extends StatelessWidget {
         '/': (context) => LandingPage(),
         '/login': (context) => LoginPage(),
         '/profile': (context) => ProfilePage(
-          username: ModalRoute.of(context)!.settings.arguments as String,
-        ),
+              username: ModalRoute.of(context)!.settings.arguments as String,
+            ),
         '/updatePassword': (context) => UpdatePasswordPage(
-          username: ModalRoute.of(context)!.settings.arguments as String,
-        ),
+              username: ModalRoute.of(context)!.settings.arguments as String,
+            ),
         '/home': (context) => HomePage(),
         '/difficulty': (context) => DifficultySelectionPage(),
         '/quiz': (context) => QuizPage(),
