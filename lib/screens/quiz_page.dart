@@ -78,7 +78,6 @@ class _QuizPageState extends State<QuizPage> {
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.black)),
               onPressed: () {
-                Navigator.of(context).pop();
                 Navigator.pushNamed(context, '/home');
               },
             ),

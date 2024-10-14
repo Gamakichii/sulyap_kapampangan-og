@@ -18,6 +18,7 @@ class HomePage extends StatelessWidget {
         child: Column(
           children: [
             AppBar(
+              automaticallyImplyLeading: false,
               backgroundColor: Colors.transparent,
               elevation: 0,
               iconTheme: IconThemeData(
