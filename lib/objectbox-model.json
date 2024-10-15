@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:2567772409813572764",
-      "lastPropertyId": "5:5735661569945533233",
+      "lastPropertyId": "6:3853078632151339838",
       "name": "QuizQuestion",
       "properties": [
         {
@@ -32,6 +32,11 @@
         {
           "id": "5:5735661569945533233",
           "name": "difficulty",
+          "type": 9
+        },
+        {
+          "id": "6:3853078632151339838",
+          "name": "imagePath",
           "type": 9
         }
       ],

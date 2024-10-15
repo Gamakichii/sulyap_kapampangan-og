@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
+
 
 class SignupPage extends StatefulWidget {
   @override
@@ -9,130 +11,227 @@ class SignupPage extends StatefulWidget {
 
 class _SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
   final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   Future<void> _signup() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        final usersCollection = FirebaseFirestore.instance.collection('users');
-        await usersCollection.doc(_emailController.text).set({
-          'email': _emailController.text,
-          'password': _passwordController.text,
-          'username': _usernameController.text,
-        });
-        // Signup successful, navigate back to login or home screen
-        print('Signup successful');
-        Navigator.pop(context); // Go back to login
-      } catch (e) {
-        print('Error during signup: $e');
-        // Handle signup errors
-      }
+    if (_passwordController.text != _confirmPasswordController.text) {
+      _showErrorDialog('Signup Failed', 'Passwords do not match.');
+      return;
     }
+
+    try {
+      final usersCollection = FirebaseFirestore.instance.collection('users');
+      final querySnapshot = await usersCollection
+          .where('username', isEqualTo: _usernameController.text.trim())
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        await usersCollection.add({
+          'username': _usernameController.text.trim(),
+          'password': _passwordController.text.trim(),
+        });
+
+        print('Signup successful');
+        Navigator.pop(context); // Navigate back to the login page
+      } else {
+        _showErrorDialog('Signup Failed', 'Username already exists.');
+      }
+    } catch (e) {
+      print('Error during signup: $e');
+      _showErrorDialog('Signup Failed', 'An unexpected error occurred.');
+    }
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          title,
+          style: TextStyle(color: Colors.black),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.black),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'OK',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, // Extend the body behind the app bar for transparency
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Sign Up', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(
-          color: Colors.white, // Set the back arrow color to white
-        ),
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/background3.png'), // Background image
-            fit: BoxFit.cover, // Make the image cover the entire background
+      body: Stack(
+        children: [
+          // Background image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/background3.png'), // Your background image
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
-        child: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch, // Ensure fields stretch across width
-              children: [
-                SizedBox(height: 70), // Add space between the AppBar and the first field
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    labelStyle: TextStyle(color: Colors.white),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 20), // Add space between the username and email fields
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    labelStyle: TextStyle(color: Colors.white),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    // Add email format validation
-                    return null;
-                  },
-                ),
-                SizedBox(height: 20), // Add space between the email and password fields
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: TextStyle(color: Colors.white),
-                  ),
-                  obscureText: true,
-                  style: TextStyle(color: Colors.white),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    // Add password strength validation
-                    return null;
-                  },
-                ),
-                SizedBox(height: 30), // Add space before the button
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25), // Rounded corners
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Background blur
+                child: Container(
+                  width: 350, // Adjust the width of the form
+                  padding: EdgeInsets.all(20), // Add padding inside the form
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3), // Slightly transparent background
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        spreadRadius: 5,
+                        offset: Offset(0, 10),
                       ),
-                      child: InkWell(
-                        onTap: _signup,
-                        child: Text(
+                    ],
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Title "Sign Up"
+                        Text(
                           'Sign Up',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
+                        SizedBox(height: 20), // Space between title and fields
+
+                        // Username TextField
+                        TextFormField(
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            labelText: 'Username',
+                            prefixIcon: Icon(Icons.person, color: Colors.black),
+                            labelStyle: TextStyle(color: Colors.black),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.8), // Light background inside the field
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          style: TextStyle(color: Colors.black),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your username';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16), // Space between fields
+
+                        // Password TextField
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: Icon(Icons.lock, color: Colors.black),
+                            labelStyle: TextStyle(color: Colors.black),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.8), // Light background inside the field
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          obscureText: true,
+                          style: TextStyle(color: Colors.black),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16),
+
+                        // Confirm Password TextField
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          decoration: InputDecoration(
+                            labelText: 'Confirm Password',
+                            prefixIcon: Icon(Icons.lock, color: Colors.black),
+                            labelStyle: TextStyle(color: Colors.black),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.8), // Light background inside the field
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          obscureText: true,
+                          style: TextStyle(color: Colors.black),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please confirm your password';
+                            }
+                            if (value != _passwordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 24), // Space between field and button
+
+                        // Sign Up button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                _signup(); // Call signup function
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: Colors.grey[400], // Button background color
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            child: Text(
+                              'Sign Up',
+                              style: TextStyle(color: Colors.black, fontSize: 18),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

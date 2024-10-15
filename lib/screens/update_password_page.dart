@@ -75,82 +75,124 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
       ),
       body: Stack(
         children: [
+          // Background image
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/background3.png'),
+                image: AssetImage('assets/background3.png'), // Your background image
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextFormField(
-                      controller: _currentPasswordController,
-                      decoration: InputDecoration(
-                        labelText: 'Current Password',
-                        labelStyle: TextStyle(color: Colors.white),
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25), // Rounded corners
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Background blur
+                child: Container(
+                  width: 350, // Adjust the width of the form
+                  padding: EdgeInsets.all(20), // Add padding inside the form
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3), // Slightly transparent background
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        spreadRadius: 5,
+                        offset: Offset(0, 10),
                       ),
-                      obscureText: true,
-                      style: TextStyle(color: Colors.white),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your current password';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _newPasswordController,
-                      decoration: InputDecoration(
-                        labelText: 'New Password',
-                        labelStyle: TextStyle(color: Colors.white),
-                      ),
-                      obscureText: true,
-                      style: TextStyle(color: Colors.white),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your new password';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 30),
-                    Center(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          side: BorderSide(
-                            color: Colors.white.withOpacity(0.5),
-                            width: 1,
+                    ],
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Title "Update Password"
+                        Text(
+                          'Update Password',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
                         ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            _updatePassword();
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(
-                            'Update Password',
-                            style: TextStyle(color: Colors.white, fontSize: 16),
+                        SizedBox(height: 20), // Space between title and fields
+
+                        // Current Password TextField
+                        TextFormField(
+                          controller: _currentPasswordController,
+                          decoration: InputDecoration(
+                            labelText: 'Current Password',
+                            prefixIcon: Icon(Icons.lock, color: Colors.black),
+                            labelStyle: TextStyle(color: Colors.black),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.8),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          obscureText: true,
+                          style: TextStyle(color: Colors.black),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your current password';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16), // Space between fields
+
+                        // New Password TextField
+                        TextFormField(
+                          controller: _newPasswordController,
+                          decoration: InputDecoration(
+                            labelText: 'New Password',
+                            prefixIcon: Icon(Icons.lock, color: Colors.black),
+                            labelStyle: TextStyle(color: Colors.black),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.8),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          obscureText: true,
+                          style: TextStyle(color: Colors.black),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your new password';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 24), // Space between field and button
+
+                        // Update Password button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                _updatePassword(); // Call update password function
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: Colors.grey[400], // Button background color
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            child: Text(
+                              'Update Password',
+                              style: TextStyle(color: Colors.black, fontSize: 18),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

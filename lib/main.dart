@@ -26,18 +26,43 @@ void main() async {
 
 void _populateDatabase() {
   final questions = [
+    // Easy questions (photo only)
     QuizQuestion(
-      question: 'What is the root word of the Kapampangan language?',
-      choices: ['Pampáng', 'Lakan', 'Tondo', 'Tagalog'],
-      correctAnswer: 'Pampáng',
+      choices: ['Kotsi', 'Catsi', 'Kutse', 'Carsi'],
+      correctAnswer: 'Kotsi',
       difficulty: 'Easy',
       imagePath: 'assets/car.png',
     ),
-    // ... add all your questions here
+    QuizQuestion(
+      choices: ['Itlog', 'Eglog', 'Ibon', 'Ebun'],
+      correctAnswer: 'Ebun',
+      difficulty: 'Easy',
+      imagePath: 'assets/egg.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Sombrero', 'Kupia', 'Cupa', 'Capia'],
+      correctAnswer: 'Kupia',
+      difficulty: 'Easy',
+      imagePath: 'assets/cap.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Luklukan', 'Bukbukan', 'Upuan', 'Sukuan'],
+      correctAnswer: 'Luklukan',
+      difficulty: 'Easy',
+      imagePath: 'assets/chair.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Rasbul', 'Pasbul', 'Pintu', 'Pastu'],
+      correctAnswer: 'Pasbul',
+      difficulty: 'Easy',
+      imagePath: 'assets/door.png', // Update with the actual image path
+    ),
   ];
 
   objectbox.quizQuestionBox.putMany(questions);
+  print("Inserted ${questions.length} questions into the database.");
 }
+
 
 class SulyapKapampanganApp extends StatelessWidget {
   const SulyapKapampanganApp({super.key});
@@ -50,18 +75,18 @@ class SulyapKapampanganApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         textTheme: GoogleFonts.pathwayGothicOneTextTheme(
           Theme.of(context).textTheme.apply(
-                bodyColor: Colors.white,
-                displayColor: Colors.white,
-              ),
+            bodyColor: Colors.white,
+            displayColor: Colors.white,
+          ),
         ).copyWith(
           displayLarge: GoogleFonts.pathwayGothicOne(
               fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
           displayMedium:
-              GoogleFonts.pathwayGothicOne(fontSize: 24, color: Colors.white),
+          GoogleFonts.pathwayGothicOne(fontSize: 24, color: Colors.white),
           bodyLarge:
-              GoogleFonts.pathwayGothicOne(fontSize: 16, color: Colors.white),
+          GoogleFonts.pathwayGothicOne(fontSize: 16, color: Colors.white),
           bodyMedium:
-              GoogleFonts.pathwayGothicOne(fontSize: 14, color: Colors.white),
+          GoogleFonts.pathwayGothicOne(fontSize: 14, color: Colors.white),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(

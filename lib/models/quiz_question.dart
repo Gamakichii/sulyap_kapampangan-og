@@ -5,17 +5,17 @@ class QuizQuestion {
   @Id()
   int id = 0;
 
-  String question;
+  String? question;
   List<String> choices;
   String correctAnswer;
   String difficulty;
-  final String? imagePath;
+  String imagePath;
 
   QuizQuestion({
-    required this.question,
+    this.question,
     required this.choices,
     required this.correctAnswer,
     required this.difficulty,
-    this.imagePath,
+    required this.imagePath,
   });
 }

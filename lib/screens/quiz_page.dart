@@ -6,7 +6,7 @@ import '../models/quiz_question.dart';
 import '../objectbox.g.dart';
 
 class QuizPage extends StatefulWidget {
-  const QuizPage({super.key});
+  const QuizPage({Key? key}) : super(key: key);
 
   @override
   _QuizPageState createState() => _QuizPageState();
@@ -43,9 +43,8 @@ class _QuizPageState extends State<QuizPage> {
   void _checkAnswer(int selectedIndex) {
     if (_randomizedQuestions.isEmpty) return;
 
-    if (selectedIndex ==
-        _randomizedQuestions[_currentQuestionIndex].choices.indexOf(
-            _randomizedQuestions[_currentQuestionIndex].correctAnswer)) {
+    if (_randomizedQuestions[_currentQuestionIndex].choices[selectedIndex] ==
+        _randomizedQuestions[_currentQuestionIndex].correctAnswer) {
       setState(() {
         _isAnswerCorrect = true;
         _progress += 20;
@@ -72,8 +71,10 @@ class _QuizPageState extends State<QuizPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Congratulations!', style: TextStyle(color: Colors.black)),
-          content: Text('You have completed the quiz.', style: TextStyle(color: Colors.black)),
+          title:
+          Text('Congratulations!', style: TextStyle(color: Colors.black)),
+          content: Text('You have completed the quiz.',
+              style: TextStyle(color: Colors.black)),
           actions: [
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.black)),
@@ -136,6 +137,7 @@ class _QuizPageState extends State<QuizPage> {
                       ?.copyWith(color: Colors.white),
                 ),
               ),
+              SizedBox(height: 10),
               LinearProgressIndicator(value: _progress / 100),
               SizedBox(height: 10),
               if (_errorMessage != null)
@@ -153,74 +155,97 @@ class _QuizPageState extends State<QuizPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Display the image for the current question with a frame
-                      if (_randomizedQuestions[_currentQuestionIndex].imagePath != null)
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.blueAccent, width: 2), // Frame color and width
-                            borderRadius: BorderRadius.circular(10), // Round the corners
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10), // Round the corners of the image
-                            child: Image.asset(
-                              _randomizedQuestions[_currentQuestionIndex].imagePath!,
-                              height: 200, // Adjust the height as necessary
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      SizedBox(height: 20),
-                      // Display the question text
+                      // Instruction Text
                       Text(
-                        _randomizedQuestions[_currentQuestionIndex].question,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(color: Colors.white),
+                        'Select the correct Kapampangan word for each image',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                         textAlign: TextAlign.center,
                       ),
+                      SizedBox(height: 20), // Reduced space before image
+                      Container(
+                        height: 200,
+                        width: double.infinity,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.asset(
+                            _randomizedQuestions[_currentQuestionIndex]
+                                .imagePath,
+                            fit: BoxFit.contain, // Prevents cropping
+                          ),
+                        ),
+                      ),
                       SizedBox(height: 20),
-                      ..._randomizedQuestions[_currentQuestionIndex]
-                          .choices
-                          .asMap()
-                          .entries
-                          .map((entry) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                                ),
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    padding: EdgeInsets.zero,
+                      if (_difficulty != 'Easy' &&
+                          _randomizedQuestions[_currentQuestionIndex]
+                              .question !=
+                              null)
+                        Text(
+                          _randomizedQuestions[_currentQuestionIndex]
+                              .question!,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                      SizedBox(height: 50),
+                      // Expanded container for choices
+                      Expanded(
+                        flex: 2, // Make the choices area bigger
+                        child: GridView.builder(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2, // 2 columns
+                            childAspectRatio: 2, // Adjust the aspect ratio as needed
+                            crossAxisSpacing: 10, // Space between columns
+                            mainAxisSpacing: 10, // Space between rows
+                          ),
+                          itemCount: _randomizedQuestions[_currentQuestionIndex].choices.length,
+                          itemBuilder: (context, index) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(
+                                    sigmaX: 10, sigmaY: 10),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(15),
+                                    border: Border.all(
+                                        color:
+                                        Colors.white.withOpacity(0.2)),
                                   ),
-                                  onPressed: () => _checkAnswer(entry.key),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    child: Text(
-                                      entry.value,
-                                      style: TextStyle(color: Colors.white, fontSize: 20),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.circular(15),
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    onPressed: () => _checkAnswer(index),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
+                                      child: Text(
+                                        _randomizedQuestions[_currentQuestionIndex].choices[index],
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 25),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                            );
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),
