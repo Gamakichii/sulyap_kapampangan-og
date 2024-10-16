@@ -274,7 +274,7 @@ class _QuizPageState extends State<QuizPage> {
                 ],
                 onTap: (index) {
                   if (index == 0) {
-                    Navigator.pushNamed(context, '/home');
+                    Navigator.pushNamed(context, '/home', arguments: _username);
                   } else if (index == 1 && !_hintUsed) {
                     _useHint();
                   }
