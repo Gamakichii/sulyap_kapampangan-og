@@ -20,13 +20,21 @@ class _QuizPageState extends State<QuizPage> {
   bool _hintUsed = false;
   String? _errorMessage;
   String? _difficulty;
+  String? _username;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_difficulty == null) {
-      _difficulty = ModalRoute.of(context)!.settings.arguments as String;
-      _loadQuestions();
+      {
+        final args = ModalRoute
+            .of(context)!
+            .settings
+            .arguments as Map<String, dynamic>;
+        _difficulty = args['difficulty'];
+        _username = args['username'];
+        _loadQuestions();
+      }
     }
   }
 
@@ -79,7 +87,7 @@ class _QuizPageState extends State<QuizPage> {
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.black)),
               onPressed: () {
-                Navigator.pushNamed(context, '/home');
+                Navigator.pushNamed(context, '/home', arguments: _username);
               },
             ),
           ],
