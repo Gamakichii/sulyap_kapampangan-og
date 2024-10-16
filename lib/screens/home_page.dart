@@ -79,9 +79,9 @@ class HomePage extends StatelessWidget {
                             crossAxisCount: 1,
                             childAspectRatio: 3,
                             children: [
-                              _buildDifficultyButton(context, 'Easy', isLocked: false),
-                              _buildDifficultyButton(context, 'Medium', isLocked: true),
-                              _buildDifficultyButton(context, 'Hard', isLocked: true),
+                              _buildDifficultyButton(context, 'Easy', username, isLocked: false),
+                              _buildDifficultyButton(context, 'Medium', username, isLocked: true),
+                              _buildDifficultyButton(context, 'Hard', username, isLocked: true),
                               _buildProfileButton(context, userData['username']),
                             ],
                           ),
@@ -98,7 +98,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildDifficultyButton(BuildContext context, String difficulty,
+  Widget _buildDifficultyButton(BuildContext context, String difficulty, String username,
       {required bool isLocked}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -124,7 +124,7 @@ class HomePage extends StatelessWidget {
               onPressed: isLocked ? null : () => Navigator.pushNamed(
                 context,
                 '/difficulty',
-                arguments: difficulty,
+                arguments: {'difficulty': difficulty, 'username': username},
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

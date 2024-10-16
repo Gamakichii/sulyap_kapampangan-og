@@ -4,8 +4,9 @@ import 'dart:ui'; // For ImageFilter
 class DifficultySelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final String difficulty =
-        ModalRoute.of(context)!.settings.arguments as String;
+    final Map<String, dynamic> args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final String difficulty = args['difficulty'];
+    final String username = args['username'];
 
     return SafeArea(
       top: false, // Allow the content to extend behind the status bar
@@ -68,7 +69,7 @@ class DifficultySelectionPage extends StatelessWidget {
                             ),
                             onPressed: () => Navigator.pushNamed(
                                 context, '/quiz',
-                                arguments: difficulty),
+                                arguments: {'difficulty': difficulty, 'username':username}),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 8),
