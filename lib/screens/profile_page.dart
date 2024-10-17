@@ -11,7 +11,6 @@ class ProfilePage extends StatelessWidget {
   Future<void> _deleteAccount(BuildContext context) async {
     final usersCollection = FirebaseFirestore.instance.collection('users');
 
-    // Show confirmation dialog before deleting the account.
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -38,7 +37,6 @@ class ProfilePage extends StatelessWidget {
 
     if (confirm == true) {
       try {
-        // Find the user by username and delete the document.
         final querySnapshot = await usersCollection
             .where('username', isEqualTo: username)
             .get();
@@ -46,11 +44,10 @@ class ProfilePage extends StatelessWidget {
         if (querySnapshot.docs.isNotEmpty) {
           await querySnapshot.docs.first.reference.delete();
 
-          // Navigate back to the login page after deletion.
           Navigator.pushNamedAndRemoveUntil(
             context,
             '/login',
-                (route) => false, // Remove all routes from the stack.
+                (route) => false,
           );
         }
       } catch (e) {
@@ -73,6 +70,16 @@ class ProfilePage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // Logout method
+  void _logout(BuildContext context) {
+    // Clear any user session or authentication state here
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/login',
+          (route) => false, // Remove all routes from the stack
     );
   }
 
@@ -129,9 +136,11 @@ class ProfilePage extends StatelessWidget {
                               ),
                             ),
                             onPressed: () {
-                              // Navigate to password update screen
-                              Navigator.pushNamed(context, '/updatePassword',
-                                  arguments: username);
+                              Navigator.pushNamed(
+                                context,
+                                '/updatePassword',
+                                arguments: username,
+                              );
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
@@ -164,6 +173,32 @@ class ProfilePage extends StatelessWidget {
                                 'Delete Account',
                                 style: TextStyle(
                                   color: Colors.red,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          // Logout button
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              side: BorderSide(
+                                color: Colors.white.withOpacity(0.5),
+                                width: 1,
+                              ),
+                            ),
+                            onPressed: () => _logout(context),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(
+                                'Logout',
+                                style: TextStyle(
+                                  color: Colors.white,
                                   fontSize: 16,
                                 ),
                               ),
