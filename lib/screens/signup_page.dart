@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
-
 class SignupPage extends StatefulWidget {
   @override
   _SignupPageState createState() => _SignupPageState();
@@ -16,31 +15,32 @@ class _SignupPageState extends State<SignupPage> {
   final _confirmPasswordController = TextEditingController();
 
   Future<void> _signup() async {
-    if (_passwordController.text != _confirmPasswordController.text) {
-      _showErrorDialog('Signup Failed', 'Passwords do not match.');
-      return;
-    }
+    if (_formKey.currentState!.validate()) {
+      try {
+        // Check if username already exists
+        final usersCollection = FirebaseFirestore.instance.collection('users');
+        final querySnapshot = await usersCollection
+            .where('username', isEqualTo: _usernameController.text.trim())
+            .get();
 
-    try {
-      final usersCollection = FirebaseFirestore.instance.collection('users');
-      final querySnapshot = await usersCollection
-          .where('username', isEqualTo: _usernameController.text.trim())
-          .get();
+        if (querySnapshot.docs.isNotEmpty) {
+          // Username already exists
+          _showErrorDialog('Sign Up Failed', 'Username already exists.');
+        } else {
+          // Create new user document
+          await usersCollection.add({
+            'username': _usernameController.text.trim(),
+            'password': _passwordController.text.trim(),
+          });
 
-      if (querySnapshot.docs.isEmpty) {
-        await usersCollection.add({
-          'username': _usernameController.text.trim(),
-          'password': _passwordController.text.trim(),
-        });
-
-        print('Signup successful');
-        Navigator.pop(context); // Navigate back to the login page
-      } else {
-        _showErrorDialog('Signup Failed', 'Username already exists.');
+          // Sign up successful - navigate to the login page
+          print('Sign up successful');
+          Navigator.pop(context); // Go back to the login page
+        }
+      } catch (e) {
+        print('Error during signup: $e');
+        _showErrorDialog('Sign Up Failed', 'An unexpected error occurred.');
       }
-    } catch (e) {
-      print('Error during signup: $e');
-      _showErrorDialog('Signup Failed', 'An unexpected error occurred.');
     }
   }
 
@@ -72,166 +72,164 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.white, // Set background color to white
+      extendBodyBehindAppBar: false, // Prevent body from extending behind app bar
       appBar: AppBar(
-        title: Text('Sign Up', style: TextStyle(color: Colors.white)),
+        title: Text('Sign Up', style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.light,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
-      body: Stack(
-        children: [
-          // Background image
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/background3.png'), // Your background image
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(25), // Rounded corners
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Background blur
-                child: Container(
-                  width: 350, // Adjust the width of the form
-                  padding: EdgeInsets.all(20), // Add padding inside the form
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3), // Slightly transparent background
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        spreadRadius: 5,
-                        offset: Offset(0, 10),
-                      ),
-                    ],
+      body: Center( // Center the form horizontally
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25), // Rounded corners
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Background blur
+            child: Container(
+              width: 350, // Adjust the width of the form
+              padding: EdgeInsets.all(20), // Add padding inside the form
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.5), // Slightly transparent background
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    spreadRadius: 5,
+                    offset: Offset(0, 10),
                   ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Title "Sign Up"
-                        Text(
-                          'Sign Up',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        SizedBox(height: 20), // Space between title and fields
-
-                        // Username TextField
-                        TextFormField(
-                          controller: _usernameController,
-                          decoration: InputDecoration(
-                            labelText: 'Username',
-                            prefixIcon: Icon(Icons.person, color: Colors.black),
-                            labelStyle: TextStyle(color: Colors.black),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.8), // Light background inside the field
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          style: TextStyle(color: Colors.black),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your username';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 16), // Space between fields
-
-                        // Password TextField
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            prefixIcon: Icon(Icons.lock, color: Colors.black),
-                            labelStyle: TextStyle(color: Colors.black),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.8), // Light background inside the field
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          obscureText: true,
-                          style: TextStyle(color: Colors.black),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 16),
-
-                        // Confirm Password TextField
-                        TextFormField(
-                          controller: _confirmPasswordController,
-                          decoration: InputDecoration(
-                            labelText: 'Confirm Password',
-                            prefixIcon: Icon(Icons.lock, color: Colors.black),
-                            labelStyle: TextStyle(color: Colors.black),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.8), // Light background inside the field
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          obscureText: true,
-                          style: TextStyle(color: Colors.black),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please confirm your password';
-                            }
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 24), // Space between field and button
-
-                        // Sign Up button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                _signup(); // Call signup function
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              backgroundColor: Colors.grey[400], // Button background color
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                ],
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: RichText( // Use RichText to style parts of the text
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Register ', // Bold "Register"
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
                             ),
-                            child: Text(
-                              'Sign Up',
-                              style: TextStyle(color: Colors.black, fontSize: 18),
+                            TextSpan(
+                              text: 'your account', // Normal "your account"
+                              style: TextStyle(
+                                fontSize: 22,
+                                color: Colors.black,
+                              ),
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20), // Space between title and fields
+
+                    // Username TextField
+                    TextFormField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        prefixIcon: Icon(Icons.person, color: Color(0xFFB7A6E0)),
+                        labelStyle: TextStyle(color: Colors.grey),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.8),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      style: TextStyle(color: Colors.black),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your username';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+
+                    // Password TextField
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: Icon(Icons.lock, color: Color(0xFFB7A6E0)),
+                        labelStyle: TextStyle(color: Colors.grey),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.8),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      obscureText: true,
+                      style: TextStyle(color: Colors.black),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+
+                    // Confirm Password TextField
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      decoration: InputDecoration(
+                        labelText: 'Confirm Password',
+                        prefixIcon: Icon(Icons.lock, color: Color(0xFFB7A6E0)),
+                        labelStyle: TextStyle(color: Colors.grey),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.8),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      obscureText: true,
+                      style: TextStyle(color: Colors.black),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please confirm your password';
+                        }
+                        if (value != _passwordController.text) {
+                          return 'Passwords do not match';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 24),
+
+                    // Sign Up button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _signup,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Color(0xFFB7A6E0), // Button background color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                      ],
+                        child: Text(
+                          'Sign Up',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
