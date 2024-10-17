@@ -31,7 +31,7 @@ void _populateDatabase() {
       choices: ['Kotsi', 'Catsi', 'Kutse', 'Carsi'],
       correctAnswer: 'Kotsi',
       difficulty: 'Easy',
-      imagePath: 'assets/car.png',
+      imagePath: 'assets/easy_mode_images/kotsi.png',
     ),
     QuizQuestion(
       choices: ['Itlog', 'Eglog', 'Ibon', 'Ebun'],
@@ -63,7 +63,6 @@ void _populateDatabase() {
   print("Inserted ${questions.length} questions into the database.");
 }
 
-
 class SulyapKapampanganApp extends StatelessWidget {
   const SulyapKapampanganApp({super.key});
 
@@ -75,18 +74,18 @@ class SulyapKapampanganApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         textTheme: GoogleFonts.pathwayGothicOneTextTheme(
           Theme.of(context).textTheme.apply(
-            bodyColor: Colors.white,
-            displayColor: Colors.white,
-          ),
+                bodyColor: Colors.white,
+                displayColor: Colors.white,
+              ),
         ).copyWith(
           displayLarge: GoogleFonts.pathwayGothicOne(
               fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
           displayMedium:
-          GoogleFonts.pathwayGothicOne(fontSize: 24, color: Colors.white),
+              GoogleFonts.pathwayGothicOne(fontSize: 24, color: Colors.white),
           bodyLarge:
-          GoogleFonts.pathwayGothicOne(fontSize: 16, color: Colors.white),
+              GoogleFonts.pathwayGothicOne(fontSize: 16, color: Colors.white),
           bodyMedium:
-          GoogleFonts.pathwayGothicOne(fontSize: 14, color: Colors.white),
+              GoogleFonts.pathwayGothicOne(fontSize: 14, color: Colors.white),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -102,11 +101,11 @@ class SulyapKapampanganApp extends StatelessWidget {
         '/': (context) => LandingPage(),
         '/login': (context) => LoginPage(),
         '/profile': (context) => ProfilePage(
-          username: ModalRoute.of(context)!.settings.arguments as String,
-        ),
+              username: ModalRoute.of(context)!.settings.arguments as String,
+            ),
         '/updatePassword': (context) => UpdatePasswordPage(
-          username: ModalRoute.of(context)!.settings.arguments as String,
-        ),
+              username: ModalRoute.of(context)!.settings.arguments as String,
+            ),
         '/home': (context) => HomePage(),
         '/difficulty': (context) => DifficultySelectionPage(),
         '/quiz': (context) => QuizPage(),

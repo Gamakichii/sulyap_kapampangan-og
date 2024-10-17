@@ -28,9 +28,10 @@ flutter:
     - assets/background2.png
     - assets/background3.png
     - assets/background4.png
-    - assets/car.png
-    - assets/cap.png
-    - assets/chair.png
-    - assets/door.png
-    - assets/egg.png
+    - assets/easy_mode_images/buac.png
+    - assets/easy_mode_images/bale.png
+    - assets/easy_mode_images/mabayat.png
+    - assets/easy_mode_images/kotsi.png
+    - assets/easy_mode_images/pitudturan.png
     - assets/logo.png
+    - assets/logo_purple.png
