@@ -63,7 +63,7 @@ class LandingPage extends StatelessWidget {
                     child: Text(
                       'Tap anywhere to start',
                       style: TextStyle(
-                        color: Color(0xFFFFFFFF), // White text color
+                        color: Color(0xFF624E88), // White text color
                         fontSize: 16,
                       ),
                     ),
