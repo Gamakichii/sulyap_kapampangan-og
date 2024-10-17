@@ -34,12 +34,7 @@ class HomePage extends StatelessWidget {
         return SafeArea(
           top: false,
           child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/background2.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
+            color: Colors.white, // Set background color to white
             child: Stack(
               children: [
                 Column(
@@ -52,7 +47,7 @@ class HomePage extends StatelessWidget {
                       title: Text(
                         'Welcome, ${userData['username']}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
+                          color: Colors.black, // Change text color to black
                         ),
                       ),
                     ),
@@ -65,14 +60,14 @@ class HomePage extends StatelessWidget {
                             Text(
                               'Select a difficulty',
                               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Colors.white,
+                                color: Colors.black, // Change text color to black
                               ),
                             ),
                             SizedBox(height: 20),
                             Text(
                               'Kapampangan derives from the root word pampáng...',
                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Colors.white,
+                                color: Colors.black, // Change text color to black
                               ),
                             ),
                             SizedBox(height: 250),
@@ -102,7 +97,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-
   Widget _buildDifficultyButton(BuildContext context, String difficulty, String username,
       {required bool isLocked}) {
     return Padding(
@@ -116,7 +110,7 @@ class HomePage extends StatelessWidget {
             decoration: BoxDecoration(
               color: isLocked ? Colors.grey.withOpacity(0.2) : Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              border: Border.all(color: Colors.black.withOpacity(0.2)), // Change border color to black
             ),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -137,7 +131,7 @@ class HomePage extends StatelessWidget {
                   Text(
                     difficulty,
                     style: TextStyle(
-                      color: isLocked ? Colors.grey : Colors.white,
+                      color: isLocked ? Colors.grey : Colors.black, // Change text color to black
                       fontSize: 25,
                     ),
                   ),
@@ -162,7 +156,7 @@ class HomePage extends StatelessWidget {
         onTap: () => Navigator.pushNamed(context, '/profile', arguments: username),
         child: CircleAvatar(
           radius: 30,
-          backgroundColor: Colors.white.withOpacity(0.2),
+          backgroundColor: Colors.grey.withOpacity(0.2), // Change color to gray
           child: Icon(
             Icons.person, // Placeholder for anonymous profile
             size: 40,
@@ -172,5 +166,4 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
 }
