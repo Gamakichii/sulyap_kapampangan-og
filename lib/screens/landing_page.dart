@@ -29,14 +29,14 @@ class LandingPage extends StatelessWidget {
                       children: [
                         Image.asset(
                           'assets/logo.png', // Add the correct path to the image file
-                          width: 100, // Set width as desired
-                          height: 100, // Set height as desired
+                          width: 200, // Set width as desired
+                          height: 200, // Set height as desired
                         ),
                         SizedBox(height: 16), // Space between the image and the title
                         Text(
                           'Sulyap Kapampangan',
                           style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            color: Color(0xFF624E88), // Text color
+                            color: Colors.white, // Text color
                           ),
                         ),
                         Text(
@@ -46,7 +46,7 @@ class LandingPage extends StatelessWidget {
                               .displayMedium!
                               .copyWith(
                             fontSize: 16, // Reduced font size
-                            color: Color(0xFF624E88), // Text color
+                            color: Colors.white, // Text color
                           ),
                         ),
                         SizedBox(height: 20),
@@ -63,7 +63,7 @@ class LandingPage extends StatelessWidget {
                     child: Text(
                       'Tap anywhere to start',
                       style: TextStyle(
-                        color: Color(0xFF624E88), // White text color
+                        color: Colors.white, // White text color
                         fontSize: 16,
                       ),
                     ),
