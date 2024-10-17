@@ -56,7 +56,7 @@ void _populateDatabase() {
     ),
     QuizQuestion(
       choices: ['Pitudturan', 'Masakit', 'Masaya', 'Malungkut'],
-      correctAnswer: 'Pidtudturan',
+      correctAnswer: 'Pitudturan',
       difficulty: 'Easy',
       imagePath:
           'assets/easy_mode_images/pitudturan.png', // Update with the actual image path
