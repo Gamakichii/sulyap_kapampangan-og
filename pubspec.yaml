@@ -29,14 +29,36 @@ flutter:
     - assets/background2.png
     - assets/background3.png
     - assets/background4.png
+    - assets/logo.png
+    - assets/logo_purple.png
+
     - assets/easy_mode_images/buac.png
     - assets/easy_mode_images/bale.png
     - assets/easy_mode_images/mabayat.png
     - assets/easy_mode_images/kotsi.png
+    - assets/easy_mode_images/asu.png
+    - assets/easy_mode_images/awang.png
+    - assets/easy_mode_images/bitis.png
+    - assets/easy_mode_images/dalan.png
+    - assets/easy_mode_images/danum.png
+    - assets/easy_mode_images/dutung.png
+    - assets/easy_mode_images/ebun.png
+    - assets/easy_mode_images/kayli.png
+    - assets/easy_mode_images/kupia.png
+    - assets/easy_mode_images/luklukan.png
+    - assets/easy_mode_images/lupa.png
+    - assets/easy_mode_images/malutu.png
+    - assets/easy_mode_images/manuk.png
+    - assets/easy_mode_images/marimla.png
+    - assets/easy_mode_images/matua.png
+    - assets/easy_mode_images/pabanglu.png
+    - assets/easy_mode_images/pasbul.png
+    - assets/easy_mode_images/pisamban.png
     - assets/easy_mode_images/pitudturan.png
-    - assets/logo.png
-    - assets/logo_purple.png
-    - assets/logo.png
+    - assets/easy_mode_images/punu.png
+    - assets/easy_mode_images/tanaman.png
+    - assets/easy_mode_images/yelu.png
+
     - assets/avatars/avatar1.png
     - assets/avatars/avatar2.png
     - assets/avatars/avatar3.png
