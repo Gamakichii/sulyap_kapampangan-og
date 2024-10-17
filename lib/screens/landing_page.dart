@@ -28,7 +28,7 @@ class LandingPage extends StatelessWidget {
                     Column(
                       children: [
                         Image.asset(
-                          'assets/image.png', // Add the correct path to the image file
+                          'assets/logo.png', // Add the correct path to the image file
                           width: 100, // Set width as desired
                           height: 100, // Set height as desired
                         ),
