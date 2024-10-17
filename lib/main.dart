@@ -34,28 +34,186 @@ void _populateDatabase() {
       imagePath: 'assets/easy_mode_images/kotsi.png',
     ),
     QuizQuestion(
-      choices: ['Itlog', 'Eglog', 'Ibon', 'Ebun'],
+      choices: ['Mabayat', 'Dalan', 'Ditak', 'Malagad'],
+      correctAnswer: 'Mabayat',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/mabayat.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Manuk', 'Anak', 'Bale', 'Buri'],
+      correctAnswer: 'Bale',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/bale.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Mukha', 'Lupa', 'Mata', 'Arap'],
+      correctAnswer: 'Lupa',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/lupa.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Pitudturan', 'Masakit', 'Masaya', 'Malungkut'],
+      correctAnswer: 'Pidtudturan',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/pitudturan.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Bayu', 'Pamangan', 'Sagin', 'Manuk'],
+      correctAnswer: 'Pamangan',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/pamangan.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Ditak', 'Danum', 'Dakal', 'Dalan'],
+      correctAnswer: 'Danum',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/danum.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Pusa', 'Asu', 'Babi', 'Manuk'],
+      correctAnswer: 'Asu',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/asu.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Punu', 'Dutung', 'Bunga', 'Bulung'],
+      correctAnswer: 'Punu',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/punu.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Palaman', 'Bulung', 'Bunga', 'Tanaman'],
+      correctAnswer: 'Tanaman',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/tanaman.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Pabanglu', 'Malagad', 'Manyaman', 'Malalam'],
+      correctAnswer: 'Pabanglu',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/pabanglu.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Bengi', 'Aldo', 'Awang', 'Bayu'],
+      correctAnswer: 'Awang',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/awang.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Manuk', 'Babi', 'Pusa', 'Ebun'],
       correctAnswer: 'Ebun',
       difficulty: 'Easy',
-      imagePath: 'assets/egg.png', // Update with the actual image path
+      imagePath:
+          'assets/easy_mode_images/ebun.png', // Update with the actual image path
     ),
     QuizQuestion(
-      choices: ['Sombrero', 'Kupia', 'Cupa', 'Capia'],
+      choices: ['Matuling', 'Maputi', 'Kupia', 'Malutu'],
       correctAnswer: 'Kupia',
       difficulty: 'Easy',
-      imagePath: 'assets/cap.png', // Update with the actual image path
+      imagePath:
+          'assets/easy_mode_images/kupia.png', // Update with the actual image path
     ),
     QuizQuestion(
-      choices: ['Luklukan', 'Bukbukan', 'Upuan', 'Sukuan'],
+      choices: ['Luklukan', 'Dalan', 'Bale', 'Dutung'],
       correctAnswer: 'Luklukan',
       difficulty: 'Easy',
-      imagePath: 'assets/chair.png', // Update with the actual image path
+      imagePath:
+          'assets/easy_mode_images/luklukan.png', // Update with the actual image path
     ),
     QuizQuestion(
-      choices: ['Rasbul', 'Pasbul', 'Pintu', 'Pastu'],
+      choices: ['Anak', 'Pasbul', 'Mata', 'Arap'],
       correctAnswer: 'Pasbul',
       difficulty: 'Easy',
-      imagePath: 'assets/door.png', // Update with the actual image path
+      imagePath:
+          'assets/easy_mode_images/pasbul.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Mata', 'Arap', 'Bitis', 'Bulung'],
+      correctAnswer: 'Bitis',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/bitis.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Dalan', 'Bale', 'Pisamban', 'Eskuela'],
+      correctAnswer: 'Dalan',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/dalan.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Manuk', 'Asan', 'Babi', 'Damulag'],
+      correctAnswer: 'Manuk',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/manuk.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Dutung', 'Batu', 'Bulung', 'Danum'],
+      correctAnswer: 'Dutung',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/dutung.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Matuling', 'Maputi', 'Malutu', 'Madilim'],
+      correctAnswer: 'Matuling',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/matuling.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Matua', 'Anak', 'Pengari', 'Kapatad'],
+      correctAnswer: 'Matua',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/matua.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Kanan', 'Kayli', 'Babo', 'Lalam'],
+      correctAnswer: 'Kayli',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/kayli.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Marimla', 'Mapali', 'Matas', 'Mababa'],
+      correctAnswer: 'Marimla',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/marimla.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Pisamban', 'Eskuela', 'Ospital', 'Tindahan'],
+      correctAnswer: 'Pisamban',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/pisamban.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Malutu', 'Maputla', 'Matuling', 'Maputi'],
+      correctAnswer: 'Malutu',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/malutu.png', // Update with the actual image path
+    ),
+    QuizQuestion(
+      choices: ['Yelu', 'Danum', 'Api', 'Angin'],
+      correctAnswer: 'Yelu',
+      difficulty: 'Easy',
+      imagePath:
+          'assets/easy_mode_images/yelu.png', // Update with the actual image path
     ),
   ];
 
