@@ -20,6 +20,7 @@ dev_dependencies:
     sdk: flutter
   build_runner: ^2.0.0
   objectbox_generator: 4.0.2
+  image_picker: ^0.8.7+4
 
 flutter:
   uses-material-design: true
@@ -28,6 +29,7 @@ flutter:
     - assets/background2.png
     - assets/background3.png
     - assets/background4.png
+<<<<<<< Updated upstream
     - assets/easy_mode_images/buac.png
     - assets/easy_mode_images/bale.png
     - assets/easy_mode_images/mabayat.png
@@ -35,3 +37,20 @@ flutter:
     - assets/easy_mode_images/pitudturan.png
     - assets/logo.png
     - assets/logo_purple.png
+=======
+    - assets/car.png
+    - assets/cap.png
+    - assets/chair.png
+    - assets/door.png
+    - assets/egg.png
+    - assets/logo.png
+    - assets/avatars/avatar1.png
+    - assets/avatars/avatar2.png
+    - assets/avatars/avatar3.png
+    - assets/avatars/avatar4.png
+    - assets/avatars/avatar5.png
+    - assets/avatars/avatar6.png
+    - assets/avatars/avatar7.png
+    - assets/avatars/avatar8.png
+    - assets/avatars/avatar9.png
+>>>>>>> Stashed changes
