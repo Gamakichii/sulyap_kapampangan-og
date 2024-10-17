@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Set background color to white
+      backgroundColor: Colors.white,
       extendBodyBehindAppBar: false, // Prevent body from extending behind app bar
       appBar: AppBar(
         title: Text('Login', style: TextStyle(color: Colors.black)),
@@ -84,8 +84,8 @@ class _LoginPageState extends State<LoginPage> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Background blur
             child: Container(
-              width: 350, // Adjust the width of the form
-              padding: EdgeInsets.all(20), // Add padding inside the form
+              width: 350,
+              padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.5), // Slightly transparent background
                 borderRadius: BorderRadius.circular(25),
@@ -103,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Align( // Align the "Login to your account" text to the left
+                    Align(
                       alignment: Alignment.center,
                       child: RichText(
                         text: TextSpan(
@@ -223,7 +223,6 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(
                                 color: Color(0xFF8967B3), // Set color for "Register"
                                 fontSize: 14,
-                                decoration: TextDecoration.underline,
                               ),
                             ),
                           ],
