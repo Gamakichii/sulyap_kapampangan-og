@@ -31,7 +31,6 @@ flutter:
     - assets/background4.png
     - assets/logo.png
     - assets/logo_purple.png
-
     - assets/easy_mode_images/buac.png
     - assets/easy_mode_images/bale.png
     - assets/easy_mode_images/mabayat.png
@@ -58,7 +57,6 @@ flutter:
     - assets/easy_mode_images/punu.png
     - assets/easy_mode_images/tanaman.png
     - assets/easy_mode_images/yelu.png
-
     - assets/avatars/avatar1.png
     - assets/avatars/avatar2.png
     - assets/avatars/avatar3.png
