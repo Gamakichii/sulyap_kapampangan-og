@@ -102,6 +102,16 @@ class _QuizPageState extends State<QuizPage> {
     if (_difficulty == 'Easy') {
       return Column(
         children: [
+          Text(
+            'Select the correct Kapampangan word for each image',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
           Container(
             height: 200,
             width: double.infinity,
@@ -115,6 +125,8 @@ class _QuizPageState extends State<QuizPage> {
           ),
           SizedBox(height: 20),
           _buildChoices(),
+          SizedBox(height: 20),
+          _buildSubmitButton(),
         ],
       );
     } else if (_difficulty == 'Medium') {
@@ -130,6 +142,8 @@ class _QuizPageState extends State<QuizPage> {
           ),
           SizedBox(height: 20),
           _buildChoices(),
+          SizedBox(height: 20),
+          _buildSubmitButton(),
         ],
       );
     } else {
@@ -155,6 +169,10 @@ class _QuizPageState extends State<QuizPage> {
           ElevatedButton(
             onPressed: () => _checkAnswer(_answerController.text),
             child: Text('Submit'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFB7A6E0),
+              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+            ),
           ),
         ],
       );
@@ -164,9 +182,10 @@ class _QuizPageState extends State<QuizPage> {
   Widget _buildChoices() {
     return GridView.builder(
       shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 1.5,
+        childAspectRatio: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
@@ -175,7 +194,7 @@ class _QuizPageState extends State<QuizPage> {
         bool isSelected = _selectedChoiceIndex == index;
         return ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected ? Colors.green : Color(0xFFB7A6E0),
+            backgroundColor: isSelected ? Colors.deepPurple : Color(0xFFB7A6E0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),
@@ -187,10 +206,34 @@ class _QuizPageState extends State<QuizPage> {
           },
           child: Text(
             _randomizedQuestions[_currentQuestionIndex].choices![index],
-            style: TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+        backgroundColor:
+            _selectedChoiceIndex != null ? Color(0xFFB7A6E0) : Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+      ),
+      onPressed: _selectedChoiceIndex != null
+          ? () => _checkAnswer(_randomizedQuestions[_currentQuestionIndex]
+              .choices![_selectedChoiceIndex!])
+          : null,
+      child: Text(
+        'Submit',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+        ),
+      ),
     );
   }
 
@@ -198,27 +241,24 @@ class _QuizPageState extends State<QuizPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Color(0xFFB7A6E0),
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
+        title: Text(
+          'Quiz - $_difficulty',
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge
+              ?.copyWith(color: Colors.black),
+        ),
+      ),
       body: SafeArea(
-        top: false,
         child: _randomizedQuestions.isEmpty
             ? Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  AppBar(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    iconTheme: IconThemeData(color: Colors.black),
-                    title: Text(
-                      'Quiz - $_difficulty',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(color: Colors.black),
-                    ),
-                  ),
-                  SizedBox(height: 10),
                   LinearProgressIndicator(value: _progress / 100),
-                  SizedBox(height: 10),
                   if (_errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -229,71 +269,37 @@ class _QuizPageState extends State<QuizPage> {
                       ),
                     ),
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: _buildQuestionWidget(),
-                    ),
-                  ),
-                  if (_difficulty != 'Hard')
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 180, vertical: 20),
-                        backgroundColor: _selectedChoiceIndex != null
-                            ? Color(0xFFB7A6E0)
-                            : Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        side: BorderSide(
-                          color: _selectedChoiceIndex != null
-                              ? Color(0xFFB7A6E0)
-                              : Colors.grey,
-                          width: 2,
-                        ),
-                        shadowColor: Colors.black.withOpacity(0.2),
-                        elevation: 6,
-                      ),
-                      onPressed: _selectedChoiceIndex != null
-                          ? () => _checkAnswer(
-                              _randomizedQuestions[_currentQuestionIndex]
-                                  .choices![_selectedChoiceIndex!])
-                          : null,
-                      child: Text(
-                        'Submit',
-                        style: TextStyle(
-                          color: _selectedChoiceIndex != null
-                              ? Colors.white
-                              : Colors.grey,
-                          fontSize: 20,
-                        ),
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: _buildQuestionWidget(),
                       ),
                     ),
-                  BottomNavigationBar(
-                    backgroundColor: Colors.transparent,
-                    unselectedItemColor: Colors.black,
-                    selectedItemColor: Colors.black,
-                    items: const [
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.home, color: Colors.black),
-                        label: 'Home',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.lightbulb, color: Colors.black),
-                        label: 'Hint',
-                      ),
-                    ],
-                    onTap: (index) {
-                      if (index == 0) {
-                        Navigator.pushNamed(context, '/home',
-                            arguments: _username);
-                      } else if (index == 1 && !_hintUsed) {
-                        // Implement hint functionality
-                      }
-                    },
                   ),
                 ],
               ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        unselectedItemColor: Colors.black,
+        selectedItemColor: Colors.black,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, color: Color(0xFFB7A6E0)),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.lightbulb, color: Color(0xFFB7A6E0)),
+            label: 'Hint',
+          ),
+        ],
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushNamed(context, '/home', arguments: _username);
+          } else if (index == 1 && !_hintUsed) {
+            // Implement hint functionality
+          }
+        },
       ),
     );
   }
