@@ -201,18 +201,18 @@ class _QuizPageState extends State<QuizPage> {
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? Colors.green.withOpacity(0.5) // Active color
+                                      ? Colors.deepPurple.withOpacity(0.5) // Active color
                                       : Colors.white.withOpacity(0.2), // Default color
                                   borderRadius: BorderRadius.circular(15),
                                   border: Border.all(
                                       color: isSelected
-                                          ? Colors.green // Highlight active choice
+                                          ? Colors.deepPurple // Highlight active choice
                                           : Colors.white.withOpacity(0.2)),
                                 ),
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: isSelected
-                                        ? Colors.green // Active background color
+                                        ? Colors.deepPurple // Active background color
                                         : Color(0xFFB7A6E0), // Default background color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15),
