@@ -19,7 +19,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String username = ModalRoute.of(context)!.settings.arguments as String;
+    final String username =
+        ModalRoute.of(context)!.settings.arguments as String;
 
     return FutureBuilder<Map<String, dynamic>?>(
       future: _getUserData(username),
@@ -47,8 +48,8 @@ class HomePage extends StatelessWidget {
                       title: Text(
                         'Welcome, ${userData['username']}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.black, // Change text color to black
-                        ),
+                              color: Colors.black, // Change text color to black
+                            ),
                       ),
                     ),
                     Expanded(
@@ -59,16 +60,24 @@ class HomePage extends StatelessWidget {
                           children: [
                             Text(
                               'Select a difficulty',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Colors.black, // Change text color to black
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                    color: Colors
+                                        .black, // Change text color to black
+                                  ),
                             ),
                             SizedBox(height: 20),
                             Text(
                               'Kapampangan derives from the root word pampáng...',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Colors.black, // Change text color to black
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(
+                                    color: Colors
+                                        .black, // Change text color to black
+                                  ),
                             ),
                             SizedBox(height: 250),
                             Expanded(
@@ -76,9 +85,12 @@ class HomePage extends StatelessWidget {
                                 crossAxisCount: 1,
                                 childAspectRatio: 3,
                                 children: [
-                                  _buildDifficultyButton(context, 'Easy', username, isLocked: false),
-                                  _buildDifficultyButton(context, 'Medium', username, isLocked: true),
-                                  _buildDifficultyButton(context, 'Hard', username, isLocked: true),
+                                  _buildDifficultyButton(
+                                      context, 'Easy', username),
+                                  _buildDifficultyButton(
+                                      context, 'Medium', username),
+                                  _buildDifficultyButton(
+                                      context, 'Hard', username),
                                 ],
                               ),
                             ),
@@ -88,7 +100,8 @@ class HomePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                _buildProfileButton(context, userData['username']), // Positioned top-right
+                _buildProfileButton(
+                    context, userData['username']), // Positioned top-right
               ],
             ),
           ),
@@ -97,8 +110,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildDifficultyButton(BuildContext context, String difficulty, String username,
-      {required bool isLocked}) {
+  Widget _buildDifficultyButton(
+      BuildContext context, String difficulty, String username) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ClipRRect(
@@ -108,9 +121,9 @@ class HomePage extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: isLocked ? Colors.grey.withOpacity(0.2) : Colors.white.withOpacity(0.2),
+              color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.black.withOpacity(0.2)), // Change border color to black
+              border: Border.all(color: Colors.black.withOpacity(0.2)),
             ),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -120,26 +133,17 @@ class HomePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              onPressed: isLocked ? null : () => Navigator.pushNamed(
+              onPressed: () => Navigator.pushNamed(
                 context,
                 '/difficulty',
                 arguments: {'difficulty': difficulty, 'username': username},
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    difficulty,
-                    style: TextStyle(
-                      color: isLocked ? Colors.grey : Colors.black, // Change text color to black
-                      fontSize: 25,
-                    ),
-                  ),
-                  if (isLocked) ...[
-                    SizedBox(width: 10),
-                    Icon(Icons.lock, color: Colors.grey, size: 20),
-                  ],
-                ],
+              child: Text(
+                difficulty,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 25,
+                ),
               ),
             ),
           ),
@@ -153,7 +157,8 @@ class HomePage extends StatelessWidget {
       top: 75,
       right: 25,
       child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, '/profile', arguments: username),
+        onTap: () =>
+            Navigator.pushNamed(context, '/profile', arguments: username),
         child: CircleAvatar(
           radius: 30,
           backgroundColor: Colors.grey.withOpacity(0.2), // Change color to gray

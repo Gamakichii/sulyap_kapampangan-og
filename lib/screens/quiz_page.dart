@@ -22,12 +22,14 @@ class _QuizPageState extends State<QuizPage> {
   String? _difficulty;
   String? _username;
   int? _selectedChoiceIndex;
+  TextEditingController _answerController = TextEditingController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_difficulty == null) {
-      final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
       _difficulty = args['difficulty'];
       _username = args['username'];
       _loadQuestions();
@@ -44,11 +46,13 @@ class _QuizPageState extends State<QuizPage> {
     });
   }
 
-  void _checkAnswer(int selectedIndex) {
+  void _checkAnswer(String answer) {
     if (_randomizedQuestions.isEmpty) return;
 
-    if (_randomizedQuestions[_currentQuestionIndex].choices[selectedIndex] ==
-        _randomizedQuestions[_currentQuestionIndex].correctAnswer) {
+    if (answer.toLowerCase() ==
+        _randomizedQuestions[_currentQuestionIndex]
+            .correctAnswer
+            .toLowerCase()) {
       setState(() {
         _isAnswerCorrect = true;
         _progress += 20;
@@ -57,9 +61,11 @@ class _QuizPageState extends State<QuizPage> {
         if (_progress >= 100) {
           _showCongratsDialog();
         } else {
-          _currentQuestionIndex = (_currentQuestionIndex + 1) % _randomizedQuestions.length;
+          _currentQuestionIndex =
+              (_currentQuestionIndex + 1) % _randomizedQuestions.length;
           _hintUsed = false;
-          _selectedChoiceIndex = null; // Reset choice index
+          _selectedChoiceIndex = null;
+          _answerController.clear();
         }
       });
     } else {
@@ -75,8 +81,10 @@ class _QuizPageState extends State<QuizPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Congratulations!', style: TextStyle(color: Colors.black)),
-          content: Text('You have completed the quiz.', style: TextStyle(color: Colors.black)),
+          title:
+              Text('Congratulations!', style: TextStyle(color: Colors.black)),
+          content: Text('You have completed the quiz.',
+              style: TextStyle(color: Colors.black)),
           actions: [
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.black)),
@@ -90,30 +98,106 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-  void _useHint() {
-    if (!_hintUsed && _randomizedQuestions.isNotEmpty) {
-      setState(() {
-        var currentQuestion = _randomizedQuestions[_currentQuestionIndex];
-        List<String> choices = List.from(currentQuestion.choices);
-        int correctIndex = choices.indexOf(currentQuestion.correctAnswer);
-
-        int indexToRemove;
-        do {
-          indexToRemove = Random().nextInt(choices.length);
-        } while (indexToRemove == correctIndex);
-
-        choices.removeAt(indexToRemove);
-        currentQuestion.choices = choices;
-
-        _hintUsed = true;
-      });
+  Widget _buildQuestionWidget() {
+    if (_difficulty == 'Easy') {
+      return Column(
+        children: [
+          Container(
+            height: 200,
+            width: double.infinity,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(
+                _randomizedQuestions[_currentQuestionIndex].imagePath!,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          _buildChoices(),
+        ],
+      );
+    } else if (_difficulty == 'Medium') {
+      return Column(
+        children: [
+          Text(
+            _randomizedQuestions[_currentQuestionIndex].question!,
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(color: Colors.black),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          _buildChoices(),
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          Text(
+            _randomizedQuestions[_currentQuestionIndex].question!,
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(color: Colors.black),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          TextField(
+            controller: _answerController,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter your answer',
+            ),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => _checkAnswer(_answerController.text),
+            child: Text('Submit'),
+          ),
+        ],
+      );
     }
+  }
+
+  Widget _buildChoices() {
+    return GridView.builder(
+      shrinkWrap: true,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1.5,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: _randomizedQuestions[_currentQuestionIndex].choices!.length,
+      itemBuilder: (context, index) {
+        bool isSelected = _selectedChoiceIndex == index;
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isSelected ? Colors.green : Color(0xFFB7A6E0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+          onPressed: () {
+            setState(() {
+              _selectedChoiceIndex = index;
+            });
+          },
+          child: Text(
+            _randomizedQuestions[_currentQuestionIndex].choices![index],
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Set background color to white
+      backgroundColor: Colors.white,
       body: SafeArea(
         top: false,
         child: _randomizedQuestions.isEmpty
@@ -158,27 +242,28 @@ class _QuizPageState extends State<QuizPage> {
                         fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,
+                children: [
+                  AppBar(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    iconTheme: IconThemeData(color: Colors.black),
+                    title: Text(
+                      'Quiz - $_difficulty',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(color: Colors.black),
                     ),
-                    SizedBox(height: 60),
-                    Container(
-                      height: 200,
-                      width: double.infinity,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          _randomizedQuestions[_currentQuestionIndex].imagePath,
-                          fit: BoxFit.contain, // Prevents cropping
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    if (_difficulty != 'Easy' && _randomizedQuestions[_currentQuestionIndex].question != null)
-                      Text(
-                        _randomizedQuestions[_currentQuestionIndex].question!,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(color: Colors.black),
+                  ),
+                  SizedBox(height: 10),
+                  LinearProgressIndicator(value: _progress / 100),
+                  SizedBox(height: 10),
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        _errorMessage!,
+                        style: TextStyle(color: Colors.red, fontSize: 18),
                         textAlign: TextAlign.center,
                       ),
                     SizedBox(height: 30),
@@ -240,40 +325,71 @@ class _QuizPageState extends State<QuizPage> {
                         },
                       ),
                     ),
-                    SizedBox(height: 20),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: _buildQuestionWidget(),
+                    ),
+                  ),
+                  if (_difficulty != 'Hard')
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 180, vertical: 20),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 180, vertical: 20),
                         backgroundColor: _selectedChoiceIndex != null
-                            ? Color(0xFFB7A6E0) // Full button background color when active
-                            : Colors.white, // Default white background when no choice is selected
+                            ? Color(0xFFB7A6E0)
+                            : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
                         side: BorderSide(
                           color: _selectedChoiceIndex != null
-                              ? Color(0xFFB7A6E0) // Border color to match background when active
-                              : Colors.grey, // Gray border when inactive
+                              ? Color(0xFFB7A6E0)
+                              : Colors.grey,
                           width: 2,
                         ),
                         shadowColor: Colors.black.withOpacity(0.2),
-                        elevation: 6, // To give the 3D effect
+                        elevation: 6,
                       ),
                       onPressed: _selectedChoiceIndex != null
-                          ? () => _checkAnswer(_selectedChoiceIndex!)
-                          : null, // Only enable if a choice is selected
+                          ? () => _checkAnswer(
+                              _randomizedQuestions[_currentQuestionIndex]
+                                  .choices![_selectedChoiceIndex!])
+                          : null,
                       child: Text(
                         'Submit',
                         style: TextStyle(
                           color: _selectedChoiceIndex != null
-                              ? Colors.white // Text turns white when a choice is selected
-                              : Colors.grey, // Text remains gray when no choice is selected
+                              ? Colors.white
+                              : Colors.grey,
                           fontSize: 20,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  BottomNavigationBar(
+                    backgroundColor: Colors.transparent,
+                    unselectedItemColor: Colors.black,
+                    selectedItemColor: Colors.black,
+                    items: const [
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.home, color: Colors.black),
+                        label: 'Home',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.lightbulb, color: Colors.black),
+                        label: 'Hint',
+                      ),
+                    ],
+                    onTap: (index) {
+                      if (index == 0) {
+                        Navigator.pushNamed(context, '/home',
+                            arguments: _username);
+                      } else if (index == 1 && !_hintUsed) {
+                        // Implement hint functionality
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
             BottomNavigationBar(
