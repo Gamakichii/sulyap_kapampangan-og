@@ -6,16 +6,16 @@ class QuizQuestion {
   int id = 0;
 
   String? question;
-  List<String> choices;
+  List<String>? choices; // Make choices optional
   String correctAnswer;
   String difficulty;
-  String imagePath;
+  String? imagePath;
 
   QuizQuestion({
     this.question,
-    required this.choices,
+    this.choices, // Optional now
     required this.correctAnswer,
     required this.difficulty,
-    required this.imagePath,
+    this.imagePath,
   });
 }

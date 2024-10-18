@@ -120,11 +120,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final questionOffset = object.question == null
               ? null
               : fbb.writeString(object.question!);
-          final choicesOffset = fbb.writeList(
-              object.choices.map(fbb.writeString).toList(growable: false));
+          final choicesOffset = object.choices == null
+              ? null
+              : fbb.writeList(
+                  object.choices!.map(fbb.writeString).toList(growable: false));
           final correctAnswerOffset = fbb.writeString(object.correctAnswer);
           final difficultyOffset = fbb.writeString(object.difficulty);
-          final imagePathOffset = fbb.writeString(object.imagePath);
+          final imagePathOffset = object.imagePath == null
+              ? null
+              : fbb.writeString(object.imagePath!);
           fbb.startTable(7);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, questionOffset);
@@ -143,14 +147,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final choicesParam = const fb.ListReader<String>(
                   fb.StringReader(asciiOptimization: true),
                   lazy: false)
-              .vTableGet(buffer, rootOffset, 8, []);
+              .vTableGetNullable(buffer, rootOffset, 8);
           final correctAnswerParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGet(buffer, rootOffset, 10, '');
           final difficultyParam = const fb.StringReader(asciiOptimization: true)
               .vTableGet(buffer, rootOffset, 12, '');
           final imagePathParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 14, '');
+              .vTableGetNullable(buffer, rootOffset, 14);
           final object = QuizQuestion(
               question: questionParam,
               choices: choicesParam,
