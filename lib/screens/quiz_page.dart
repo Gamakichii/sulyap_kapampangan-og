@@ -121,7 +121,7 @@ class _QuizPageState extends State<QuizPage> {
             : Column(
           children: [
             AppBar(
-              backgroundColor: Colors.transparent,
+              backgroundColor: Color(0xFFB7A6E0),
               elevation: 0,
               iconTheme: IconThemeData(color: Colors.black), // Changed to black
               title: Text(
@@ -277,16 +277,16 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
             BottomNavigationBar(
-              backgroundColor: Colors.transparent,
-              unselectedItemColor: Colors.white70,
-              selectedItemColor: Colors.white,
+              backgroundColor: Colors.white,
+              unselectedItemColor: Colors.black,
+              selectedItemColor: Colors.black,
               items: const [
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.home, color: Colors.white),
+                  icon: Icon(Icons.home, color: Color(0xFFB7A6E0)),
                   label: 'Home',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.lightbulb, color: Colors.white),
+                  icon: Icon(Icons.lightbulb, color: Color(0xFFB7A6E0)),
                   label: 'Hint',
                 ),
               ],
@@ -297,7 +297,7 @@ class _QuizPageState extends State<QuizPage> {
                   _useHint();
                 }
               },
-            ),
+            )
           ],
         ),
       ),
