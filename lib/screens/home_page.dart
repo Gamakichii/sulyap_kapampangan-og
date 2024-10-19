@@ -1,148 +1,86 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  Future<Map<String, dynamic>?> _getUserData(String username) async {
-    final query = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isEqualTo: username)
-        .get();
-
-    if (query.docs.isNotEmpty) {
-      return query.docs.first.data();
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final String username =
-        ModalRoute.of(context)!.settings.arguments as String;
+    final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    final String username = arguments['username'];
+    final Map<String, dynamic> userData = arguments['userData'];
 
-    return FutureBuilder<Map<String, dynamic>?>(
-      future: _getUserData(username),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (!snapshot.hasData) {
-          return Center(child: Text('User not found'));
-        }
+    int points = userData['points'];
+    String avatarPath = userData['avatar']; // Retrieve avatar path directly
+    int level = userData['level'];
 
-        final userData = snapshot.data!;
-        return SafeArea(
-          top: false,
-          child: Container(
-            color: Colors.white, // Set background color to white
-            child: Stack(
-              children: [
-                Column(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 600, // Optional: Limit width on larger screens
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    AppBar(
-                      automaticallyImplyLeading: false,
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      iconTheme: IconThemeData(color: Colors.white),
-                      title: Text(
-                        'Welcome, ${userData['username']}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.black, // Change text color to black
-                            ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Select a difficulty',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                    color: Colors
-                                        .black, // Change text color to black
-                                  ),
-                            ),
-                            SizedBox(height: 20),
-                            Text(
-                              'Kapampangan derives from the root word pampáng...',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.copyWith(
-                                    color: Colors
-                                        .black, // Change text color to black
-                                  ),
-                            ),
-                            SizedBox(height: 250),
-                            Expanded(
-                              child: GridView.count(
-                                crossAxisCount: 1,
-                                childAspectRatio: 3,
-                                children: [
-                                  _buildDifficultyButton(
-                                      context, 'Easy', username),
-                                  _buildDifficultyButton(
-                                      context, 'Medium', username),
-                                  _buildDifficultyButton(
-                                      context, 'Hard', username),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                _buildProfileButton(
-                    context, userData['username']), // Positioned top-right
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+                    _buildWelcomeHeader(username), // Rectangle 1
+                    const SizedBox(height: 30),
 
-  Widget _buildDifficultyButton(
-      BuildContext context, String difficulty, String username) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.black.withOpacity(0.2)),
-            ),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-              onPressed: () => Navigator.pushNamed(
-                context,
-                '/difficulty',
-                arguments: {'difficulty': difficulty, 'username': username},
-              ),
-              child: Text(
-                difficulty,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 25,
+                    // Avatar with updated logic
+                    GestureDetector(
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        '/profile',
+                        arguments: {'username': username, 'userData': userData},
+                      ),
+                      child: CircleAvatar(
+                        radius: 62, // Avatar 124x124 px
+                        backgroundImage: avatarPath != null && avatarPath.isNotEmpty
+                            ? AssetImage(avatarPath) // Use a local asset image
+                            : AssetImage('assets/images/avatar1.png'), // Fallback local asset image
+                        backgroundColor: Colors.grey.withOpacity(0.2),
+                        child: avatarPath == null || avatarPath.isEmpty
+                            ? const Icon(
+                          Icons.person, // Placeholder for anonymous profile
+                          size: 40,
+                          color: Colors.white,
+                        )
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Points Display
+                    Text(
+                      'Points: $points',
+                      style: const TextStyle(
+                        fontFamily: 'ADLaM Display',
+                        fontSize: 32,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 41),
+
+                    // Select Difficulty Header
+                    const Text(
+                      'Select a Difficulty',
+                      style: TextStyle(
+                        fontFamily: 'ADLaM Display',
+                        fontSize: 32,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Difficulty Buttons and Logout in 2x2 Grid
+                    _buildDifficultyAndLogoutGrid(level, context, username, userData),
+                  ],
                 ),
               ),
             ),
@@ -152,22 +90,134 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileButton(BuildContext context, String username) {
-    return Positioned(
-      top: 75,
-      right: 25,
-      child: GestureDetector(
-        onTap: () =>
-            Navigator.pushNamed(context, '/profile', arguments: username),
-        child: CircleAvatar(
-          radius: 30,
-          backgroundColor: Colors.grey.withOpacity(0.2), // Change color to gray
-          child: Icon(
-            Icons.person, // Placeholder for anonymous profile
-            size: 40,
-            color: Colors.white,
+  Widget _buildWelcomeHeader(String username) {
+    return Container(
+      width: double.infinity,
+      height: 134,
+      decoration: BoxDecoration(
+        color: const Color(0xFFB7A6E0),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.black.withOpacity(0.4), width: 2), // Lighter border opacity
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1), // Stronger shadow effect
+            offset: const Offset(0, 5), // Larger offset for more prominence
+            blurRadius: 20, // Increased blur for aesthetic shadow
           ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        'Welcome back, $username!',
+        style: const TextStyle(
+          fontFamily: 'ADLaM Display',
+          fontSize: 32,
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
         ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildDifficultyAndLogoutGrid(int level, BuildContext context, String username, Map<String, dynamic> userData) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 24,
+      mainAxisSpacing: 24,
+      childAspectRatio: 1.2,
+      children: [
+        _buildDifficultyButton('Easy', level >= 1, context, username, userData),
+        _buildDifficultyButton('Medium', level >= 2, context, username, userData),
+        _buildDifficultyButton('Hard', level >= 3, context, username, userData),
+        _buildLogoutButton(context),
+      ],
+    );
+  }
+
+  Widget _buildDifficultyButton(String difficulty, bool isUnlocked, BuildContext context, String username, Map<String, dynamic> userData) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.black.withOpacity(0.4), width: 2), // Lighter border
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3), // Stronger shadow
+            offset: const Offset(0, 12), // Increased offset
+            blurRadius: 24, // Aesthetic blur
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: isUnlocked
+            ? () => Navigator.pushNamed(
+          context,
+          '/difficulty',
+          arguments: {'difficulty': difficulty, 'username': username, 'userData': userData},
+        )
+            : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFB7A6E0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          minimumSize: const Size(160, 134),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              difficulty,
+              style: const TextStyle(
+                fontFamily: 'ADLaM Display',
+                fontSize: 32,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Status',
+              style: const TextStyle(
+                fontFamily: 'Actor',
+                fontSize: 20,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isUnlocked ? 'Unlocked' : 'Locked',
+              style: const TextStyle(
+                fontFamily: 'ADLaM Display',
+                fontSize: 20,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+      icon: const Icon(Icons.logout, color: Colors.black),
+      label: const Text(
+        'Logout',
+        style: TextStyle(
+          fontFamily: 'ADLaM Display',
+          fontSize: 32,
+          color: Colors.black,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFB7A6E0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        minimumSize: const Size(160, 134),
       ),
     );
   }
