@@ -64,13 +64,13 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.white, // Set the background color to white
       appBar: AppBar(
-        title: Text('Update Password', style: TextStyle(color: Colors.black)),
+        title: Text('Update Password', style: TextStyle(color: Colors.black)), // Change text color to black
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.light,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.black), // Change icon color to black
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -80,17 +80,17 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 1.0),
-                child: Image.asset('assets/logo_purple.png', height: 200), // Your logo
+                child: Image.asset('assets/logo_purple.png', height: 200),
               ),
               ClipRRect(
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(25), // Rounded corners
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Background blur
                   child: Container(
-                    width: 350,
-                    padding: EdgeInsets.all(20),
+                    width: 350, // Adjust the width of the form
+                    padding: EdgeInsets.all(20), // Add padding inside the form
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withOpacity(0.5), // Slightly transparent background
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(

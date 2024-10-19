@@ -21,33 +21,18 @@ class _QuizPageState extends State<QuizPage> {
   String? _errorMessage;
   String? _difficulty;
   String? _username;
-  Map<String, dynamic>? userData;
   int? _selectedChoiceIndex;
   TextEditingController _answerController = TextEditingController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     if (_difficulty == null) {
-      final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-
-      // Check if routeArgs and required keys are present
-      if (routeArgs != null &&
-          routeArgs.containsKey('username') &&
-          routeArgs.containsKey('difficulty') &&
-          routeArgs.containsKey('userData')) {
-
-        _username = routeArgs['username'] as String;
-        _difficulty = routeArgs['difficulty'] as String;
-        userData = routeArgs['userData'] as Map<String, dynamic>;
-
-        // Perform any necessary initialization with these values
-        _loadQuestions();
-      } else {
-        // Handle missing or invalid arguments gracefully
-        print('Missing or invalid route arguments.');
-      }
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      _difficulty = args['difficulty'];
+      _username = args['username'];
+      _loadQuestions();
     }
   }
 
@@ -70,7 +55,7 @@ class _QuizPageState extends State<QuizPage> {
             .toLowerCase()) {
       setState(() {
         _isAnswerCorrect = true;
-        _progress += 10;
+        _progress += 20;
         _errorMessage = null;
 
         if (_progress >= 100) {
@@ -97,14 +82,14 @@ class _QuizPageState extends State<QuizPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title:
-          Text('Congratulations!', style: TextStyle(color: Colors.black)),
+              Text('Congratulations!', style: TextStyle(color: Colors.black)),
           content: Text('You have completed the quiz.',
               style: TextStyle(color: Colors.black)),
           actions: [
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.black)),
               onPressed: () {
-                Navigator.pushNamed(context, '/home', arguments: {'username': _username, 'userData' : userData});
+                Navigator.pushNamed(context, '/home', arguments: _username);
               },
             ),
           ],
@@ -114,8 +99,18 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   Widget _buildQuestionWidget() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final safeAreaPadding = MediaQuery.of(context).padding;
+    final availableHeight = screenHeight -
+        safeAreaPadding.top -
+        safeAreaPadding.bottom -
+        kBottomNavigationBarHeight -
+        AppBar().preferredSize.height;
+
     if (_difficulty == 'Easy') {
       return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             'Select the correct Kapampangan word for each image',
@@ -126,10 +121,10 @@ class _QuizPageState extends State<QuizPage> {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 70),
+          SizedBox(height: availableHeight * 0.2), // Reduced spacing
           Container(
-            height: 230,
-            width: double.infinity,
+            height: availableHeight * 0.2,
+            width: screenWidth * 0.8,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.asset(
@@ -138,14 +133,20 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
           ),
-          SizedBox(height: 130),
-          _buildChoices(),
-          SizedBox(height: 75),
-          _buildSubmitButton(),
+          SizedBox(height: availableHeight * 0.02), // Slightly reduced spacing
+          Container(
+            height: availableHeight * 0.4,
+            child: _buildChoices(),
+          ),
+          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
+          _buildSubmitButton(width: 1000),
+          SizedBox(height: 20),
+          _buildErrorMessage(),
         ],
       );
     } else if (_difficulty == 'Medium') {
       return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             _randomizedQuestions[_currentQuestionIndex].question!,
@@ -155,14 +156,20 @@ class _QuizPageState extends State<QuizPage> {
                 ?.copyWith(color: Colors.black),
             textAlign: TextAlign.center,
           ),
+          SizedBox(height: availableHeight * 0.05),
+          Container(
+            height: availableHeight * 0.5,
+            child: _buildChoices(),
+          ),
+          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
+          _buildSubmitButton(width: 1000),
           SizedBox(height: 20),
-          _buildChoices(),
-          SizedBox(height: 20),
-          _buildSubmitButton(),
+          _buildErrorMessage(),
         ],
       );
     } else {
       return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             _randomizedQuestions[_currentQuestionIndex].question!,
@@ -172,27 +179,26 @@ class _QuizPageState extends State<QuizPage> {
                 ?.copyWith(color: Colors.black),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 20),
-          TextField(
-            controller: _answerController,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Enter your answer',
+          SizedBox(height: availableHeight * 0.05),
+          Container(
+            width: screenWidth * 0.8,
+            child: TextField(
+              controller: _answerController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter your answer',
+              ),
             ),
           ),
+          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
+          _buildSubmitButton(width: screenWidth * 0.8),
           SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => _checkAnswer(_answerController.text),
-            child: Text('Submit'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFB7A6E0),
-              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-            ),
-          ),
+          _buildErrorMessage(),
         ],
       );
     }
   }
+
 
   Widget _buildChoices() {
     return GridView.builder(
@@ -221,34 +227,53 @@ class _QuizPageState extends State<QuizPage> {
           },
           child: Text(
             _randomizedQuestions[_currentQuestionIndex].choices![index],
-            style: TextStyle(color: Colors.white, fontSize: 25),
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         );
       },
     );
   }
 
-  Widget _buildSubmitButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 180, vertical: 15),
-        backgroundColor:
-        _selectedChoiceIndex != null ? Color(0xFFB7A6E0) : Colors.grey,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+  Widget _buildSubmitButton({required double width}) {
+    return SizedBox(
+      width: width,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 15),
+          backgroundColor: _difficulty == 'Hard' || _selectedChoiceIndex != null
+              ? Color(0xFFB7A6E0)
+              : Colors.grey,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+        onPressed: _difficulty == 'Hard'
+            ? () => _checkAnswer(_answerController.text)
+            : (_selectedChoiceIndex != null
+                ? () => _checkAnswer(_randomizedQuestions[_currentQuestionIndex]
+                    .choices![_selectedChoiceIndex!])
+                : null),
+        child: Text(
+          'Submit',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+          ),
         ),
       ),
-      onPressed: _selectedChoiceIndex != null
-          ? () => _checkAnswer(_randomizedQuestions[_currentQuestionIndex]
-          .choices![_selectedChoiceIndex!])
+    );
+  }
+
+  Widget _buildErrorMessage() {
+    return Container(
+      height: 20,
+      child: _errorMessage != null
+          ? Text(
+              _errorMessage!,
+              style: TextStyle(color: Colors.red, fontSize: 18),
+              textAlign: TextAlign.center,
+            )
           : null,
-      child: Text(
-        'Submit',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-        ),
-      ),
     );
   }
 
@@ -272,27 +297,20 @@ class _QuizPageState extends State<QuizPage> {
         child: _randomizedQuestions.isEmpty
             ? Center(child: CircularProgressIndicator())
             : Column(
-          children: [
-            LinearProgressIndicator(value: _progress / 100),
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  _errorMessage!,
-                  style: TextStyle(color: Colors.red, fontSize: 18),
-                  textAlign: TextAlign.center,
-                ),
+                children: [
+                  LinearProgressIndicator(value: _progress / 100),
+                  Expanded(
+                    child: Center(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildQuestionWidget(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: _buildQuestionWidget(),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,

@@ -40,9 +40,6 @@ class _SignupPageState extends State<SignupPage> {
           await usersCollection.add({
             'username': _usernameController.text.trim(),
             'password': _passwordController.text.trim(), // Consider hashing the password
-            'points' : 0,
-            'level' : 1,
-            'avatar' : 'assets/avatars/avatar1.png'
           });
 
           // Sign up successful - navigate to the login page
