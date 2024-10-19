@@ -1,117 +1,97 @@
-import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  Future<Map<String, dynamic>?> _getUserData(String username) async {
-    final query = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isEqualTo: username)
-        .get();
-
-    if (query.docs.isNotEmpty) {
-      return query.docs.first.data();
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final String username =
-        ModalRoute.of(context)!.settings.arguments as String;
+    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
-    return FutureBuilder<Map<String, dynamic>?>(
-      future: _getUserData(username),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (!snapshot.hasData) {
-          return Center(child: Text('User not found'));
-        }
+    if (routeArgs == null) {
+      return Scaffold(
+        body: Center(
+          child: Text('No user data provided.'),
+        ),
+      );
+    }
 
-        final userData = snapshot.data!;
-        return SafeArea(
-          top: false,
-          child: Container(
-            color: Colors.white, // Set background color to white
-            child: Stack(
+    final String username = routeArgs['username'] as String;
+    final Map<String, dynamic> userData = routeArgs['userData'] as Map<String, dynamic>;
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        color: Colors.white, // Set background color to white
+        child: Stack(
+          children: [
+            Column(
               children: [
-                Column(
-                  children: [
-                    AppBar(
-                      automaticallyImplyLeading: false,
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      iconTheme: IconThemeData(color: Colors.white),
-                      title: Text(
-                        'Welcome, ${userData['username']}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.black, // Change text color to black
-                            ),
-                      ),
+                AppBar(
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  iconTheme: IconThemeData(color: Colors.white),
+                  title: Text(
+                    'Welcome, ${userData['username']}',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.black, // Change text color to black
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Select a difficulty',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                    color: Colors
-                                        .black, // Change text color to black
-                                  ),
-                            ),
-                            SizedBox(height: 20),
-                            Text(
-                              'Kapampangan derives from the root word pampáng...',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.copyWith(
-                                    color: Colors
-                                        .black, // Change text color to black
-                                  ),
-                            ),
-                            SizedBox(height: 250),
-                            Expanded(
-                              child: GridView.count(
-                                crossAxisCount: 1,
-                                childAspectRatio: 3,
-                                children: [
-                                  _buildDifficultyButton(
-                                      context, 'Easy', username),
-                                  _buildDifficultyButton(
-                                      context, 'Medium', username),
-                                  _buildDifficultyButton(
-                                      context, 'Hard', username),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                _buildProfileButton(
-                    context, userData['username']), // Positioned top-right
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Select a difficulty',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                            color: Colors.black, // Change text color to black
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          'Kapampangan derives from the root word pampáng...',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(
+                            color: Colors.black, // Change text color to black
+                          ),
+                        ),
+                        SizedBox(height: 250),
+                        Expanded(
+                          child: GridView.count(
+                            crossAxisCount: 1,
+                            childAspectRatio: 3,
+                            children: [
+                              _buildDifficultyButton(context, 'Easy', username, userData),
+                              _buildDifficultyButton(context, 'Medium', username, userData),
+                              _buildDifficultyButton(context, 'Hard', username, userData),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-        );
-      },
+            _buildProfileButton(context, userData['username'], userData), // Positioned top-right
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildDifficultyButton(
-      BuildContext context, String difficulty, String username) {
+  Widget _buildDifficultyButton(BuildContext context, String difficulty, String username, Map<String, dynamic> userData) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ClipRRect(
@@ -136,7 +116,7 @@ class HomePage extends StatelessWidget {
               onPressed: () => Navigator.pushNamed(
                 context,
                 '/difficulty',
-                arguments: {'difficulty': difficulty, 'username': username},
+                arguments: {'difficulty': difficulty, 'userData': userData, 'username':username},
               ),
               child: Text(
                 difficulty,
@@ -152,21 +132,27 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileButton(BuildContext context, String username) {
+  Widget _buildProfileButton(BuildContext context, String username, Map<String, dynamic> userData) {
+    String? avatarPath = userData['avatar'];
+
     return Positioned(
       top: 75,
       right: 25,
       child: GestureDetector(
-        onTap: () =>
-            Navigator.pushNamed(context, '/profile', arguments: username),
+        onTap: () => Navigator.pushNamed(context, '/profile', arguments: {'username': username, 'userData': userData}),
         child: CircleAvatar(
           radius: 30,
           backgroundColor: Colors.grey.withOpacity(0.2), // Change color to gray
-          child: Icon(
-            Icons.person, // Placeholder for anonymous profile
-            size: 40,
-            color: Colors.white,
-          ),
+          backgroundImage: avatarPath != null && avatarPath.isNotEmpty
+              ? AssetImage(avatarPath) // Use the avatar image if available
+              : null, // If no avatar, use default placeholder
+          child: avatarPath == null || avatarPath.isEmpty
+              ? Icon(
+                  Icons.person, // Placeholder for anonymous profile
+                  size: 40,
+                  color: Colors.white,
+          )
+          : null,
         ),
       ),
     );
