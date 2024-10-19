@@ -101,9 +101,8 @@ class HomePage extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Color(0xFFB7A6E0), // Set fill color to #B7A6E0 for the entire button
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.black.withOpacity(0.2)),
             ),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -113,21 +112,55 @@ class HomePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              onPressed: () => Navigator.pushNamed(
-                context,
-                '/difficulty',
-                arguments: {'difficulty': difficulty, 'userData': userData, 'username':username},
-              ),
+              onPressed: () => _showConfirmationDialog(context, difficulty, username, userData),
               child: Text(
                 difficulty,
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Colors.white, // Set text color to white
                   fontSize: 25,
                 ),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _showConfirmationDialog(BuildContext context, String difficulty, String username, Map<String, dynamic> userData) {
+    return showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          "Do you want to proceed?",
+          style: TextStyle(color: Colors.black), // Set text color to black
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                '/quiz_page', // Navigate to quiz_page.dart
+                arguments: {'difficulty': difficulty, 'userData': userData, 'username': username},
+              ).then((_) {
+                Navigator.pop(ctx); // Close the dialog after navigation
+              });
+            },
+            child: Text(
+              "Yes",
+              style: TextStyle(color: Color(0xFFB7A6E0)), // Set text color to #B7A6E0
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Close dialog if "No"
+            },
+            child: Text(
+              "No",
+              style: TextStyle(color: Color(0xFFB7A6E0)), // Set text color to #B7A6E0
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -142,17 +175,17 @@ class HomePage extends StatelessWidget {
         onTap: () => Navigator.pushNamed(context, '/profile', arguments: {'username': username, 'userData': userData}),
         child: CircleAvatar(
           radius: 30,
-          backgroundColor: Colors.grey.withOpacity(0.2), // Change color to gray
+          backgroundColor: Color(0xFFB7A6E0),
           backgroundImage: avatarPath != null && avatarPath.isNotEmpty
               ? AssetImage(avatarPath) // Use the avatar image if available
               : null, // If no avatar, use default placeholder
           child: avatarPath == null || avatarPath.isEmpty
               ? Icon(
-                  Icons.person, // Placeholder for anonymous profile
-                  size: 40,
-                  color: Colors.white,
+            Icons.person, // Placeholder for anonymous profile
+            size: 40,
+            color: Colors.white,
           )
-          : null,
+              : null,
         ),
       ),
     );
