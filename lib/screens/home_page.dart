@@ -101,13 +101,12 @@ class HomePage extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Color(0xFFB7A6E0), // Fill with color #B7A6E0
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.black.withOpacity(0.2)),
             ),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
+                backgroundColor: Colors.transparent, // Make background transparent
                 shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -121,7 +120,7 @@ class HomePage extends StatelessWidget {
               child: Text(
                 difficulty,
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Colors.white, // Set text color to black for contrast
                   fontSize: 25,
                 ),
               ),
@@ -142,17 +141,17 @@ class HomePage extends StatelessWidget {
         onTap: () => Navigator.pushNamed(context, '/profile', arguments: {'username': username, 'userData': userData}),
         child: CircleAvatar(
           radius: 30,
-          backgroundColor: Colors.grey.withOpacity(0.2), // Change color to gray
+          backgroundColor: Color(0xFFB7A6E0),
           backgroundImage: avatarPath != null && avatarPath.isNotEmpty
               ? AssetImage(avatarPath) // Use the avatar image if available
               : null, // If no avatar, use default placeholder
           child: avatarPath == null || avatarPath.isEmpty
               ? Icon(
-                  Icons.person, // Placeholder for anonymous profile
-                  size: 40,
-                  color: Colors.white,
+            Icons.person, // Placeholder for anonymous profile
+            size: 40,
+            color: Colors.white,
           )
-          : null,
+              : null,
         ),
       ),
     );
