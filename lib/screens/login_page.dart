@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
         if (userData['password'] == _passwordController.text.trim()) {
           // Login successful - navigate to the HomePage with the username
           print('Login successful');
-          Navigator.pushNamed(context, '/home', arguments: _usernameController.text.trim());
+          Navigator.pushNamed(context, '/home', arguments: {'userData':userData, 'username': _usernameController.text.trim()});
         } else {
           // Incorrect password
           _showErrorDialog('Login Failed', 'Incorrect Password.');

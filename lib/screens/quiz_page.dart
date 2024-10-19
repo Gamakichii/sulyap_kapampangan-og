@@ -21,18 +21,33 @@ class _QuizPageState extends State<QuizPage> {
   String? _errorMessage;
   String? _difficulty;
   String? _username;
+  Map<String, dynamic>? userData;
   int? _selectedChoiceIndex;
   TextEditingController _answerController = TextEditingController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     if (_difficulty == null) {
-      final args =
-      ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-      _difficulty = args['difficulty'];
-      _username = args['username'];
-      _loadQuestions();
+      final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+      // Check if routeArgs and required keys are present
+      if (routeArgs != null &&
+          routeArgs.containsKey('username') &&
+          routeArgs.containsKey('difficulty') &&
+          routeArgs.containsKey('userData')) {
+
+        _username = routeArgs['username'] as String;
+        _difficulty = routeArgs['difficulty'] as String;
+        userData = routeArgs['userData'] as Map<String, dynamic>;
+
+        // Perform any necessary initialization with these values
+        _loadQuestions();
+      } else {
+        // Handle missing or invalid arguments gracefully
+        print('Missing or invalid route arguments.');
+      }
     }
   }
 
@@ -89,7 +104,7 @@ class _QuizPageState extends State<QuizPage> {
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.black)),
               onPressed: () {
-                Navigator.pushNamed(context, '/home', arguments: _username);
+                Navigator.pushNamed(context, '/home', arguments: {'username': _username, 'userData' : userData});
               },
             ),
           ],

@@ -5,9 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatefulWidget {
-  final String username;
-
-  const ProfilePage({Key? key, required this.username}) : super(key: key);
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -16,9 +14,27 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   String? selectedAvatar;
   File? _imageFile; // To store the selected image file
+  late String username; // Initialize username
+  late Map<String, dynamic> userData; // Initialize userData
 
   // ImagePicker instance
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    if (routeArgs == null) {
+      // Handle the case where no user data is provided
+      username = 'Guest'; // Default value if no username is provided
+      userData = {}; // Default empty map if no userData is provided
+    } else {
+      username = routeArgs['username'] as String; // Extract username
+      userData = routeArgs['userData'] as Map<String, dynamic>; // Extract userData
+      selectedAvatar = userData['avatar']; // Set the selected avatar from userData
+    }
+  }
 
   // Method to allow user to pick an image from the gallery
   Future<void> _pickImageFromGallery() async {
@@ -29,6 +45,9 @@ class _ProfilePageState extends State<ProfilePage> {
         _imageFile = File(pickedFile.path); // Store the picked image file
         selectedAvatar = null; // Reset avatar when a custom image is selected
       });
+      // Here you would upload the image to your backend and update userData with the new avatar URL
+      // For example:
+      // _uploadImageAndSaveUrl(_imageFile!);
     }
   }
 
@@ -74,9 +93,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedAvatar = avatarPath; // Set selected avatar
+                            selectedAvatar = avatarPath;
+                            userData['avatar'] = selectedAvatar; // Set selected avatar
                             _imageFile = null; // Reset custom image when an avatar is selected
                           });
+                          _saveAvatarToDatabase(selectedAvatar!); // Save to database
                           Navigator.pop(context); // Close the dialog
                         },
                         child: Image.asset(avatarPath),
@@ -100,6 +121,28 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       },
     );
+  }
+
+  // Method to save selected avatar to the database
+  Future<void> _saveAvatarToDatabase(String avatarPath) async {
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+
+    try {
+      // Update the user's avatar in Firestore using the username
+      await usersCollection
+          .where('username', isEqualTo: username)
+          .limit(1) // Limit to one user
+          .get()
+          .then((snapshot) {
+        if (snapshot.docs.isNotEmpty) {
+          // Update the specific document with the new avatar
+          snapshot.docs.first.reference.update({'avatar': avatarPath});
+        }
+      });
+    } catch (e) {
+      print('Error updating avatar: $e');
+      _showErrorDialog(context, 'Error', 'Failed to update avatar.');
+    }
   }
 
   // Method to delete account
@@ -135,7 +178,7 @@ class _ProfilePageState extends State<ProfilePage> {
       try {
         // Find the user by username and delete the document
         final querySnapshot = await usersCollection
-            .where('username', isEqualTo: widget.username)
+            .where('username', isEqualTo: username) // Use extracted username
             .get();
 
         if (querySnapshot.docs.isNotEmpty) {
@@ -201,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Welcome, ${widget.username}',
+                'Welcome, $username', // Use extracted username
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: Colors.black,
                 ),
@@ -245,7 +288,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Navigator.pushNamed(
                             context,
                             '/updatePassword',
-                            arguments: widget.username,
+                            arguments: username, // Pass username to update password
                           );
                         },
                         child: Padding(
