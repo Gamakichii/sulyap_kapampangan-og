@@ -60,12 +60,10 @@ class SulyapKapampanganApp extends StatelessWidget {
       routes: {
         '/': (context) => LandingPage(),
         '/login': (context) => LoginPage(),
-        '/profile': (context) => ProfilePage(
-              username: ModalRoute.of(context)!.settings.arguments as String,
-            ),
+        '/profile': (context) => ProfilePage(),
         '/updatePassword': (context) => UpdatePasswordPage(
-              username: ModalRoute.of(context)!.settings.arguments as String,
-            ),
+          username: ModalRoute.of(context)!.settings.arguments as String,
+        ),
         '/home': (context) => HomePage(),
         '/difficulty': (context) => DifficultySelectionPage(),
         '/quiz': (context) => QuizPage(),
