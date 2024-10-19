@@ -21,7 +21,7 @@ class _QuizPageState extends State<QuizPage> {
   String? _errorMessage;
   String? _difficulty;
   String? _username;
-  Map<String, dynamic>? userData;
+  Map<String, dynamic>? userData; // Store user data
   int? _selectedChoiceIndex;
   TextEditingController _answerController = TextEditingController();
 
@@ -74,6 +74,7 @@ class _QuizPageState extends State<QuizPage> {
         _errorMessage = null;
 
         if (_progress >= 100) {
+          _updateUserLevel(); // Update the user's level when quiz is completed
           _showCongratsDialog();
         } else {
           _currentQuestionIndex =
@@ -91,13 +92,24 @@ class _QuizPageState extends State<QuizPage> {
     }
   }
 
+  void _updateUserLevel() {
+    if (_difficulty == 'Easy' && (userData?['level'] ?? 1) < 2) {
+      userData?['level'] = 2; // Set level to 2 for Easy completion
+    } else if (_difficulty == 'Medium' && (userData?['level'] ?? 2) < 3) {
+      userData?['level'] = 3; // Set level to 3 for Medium completion
+    }
+
+    // Update user data in Firestore or your database
+    // Assuming you have a method to save user data
+  }
+
   void _showCongratsDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title:
-              Text('Congratulations!', style: TextStyle(color: Colors.black)),
+          Text('Congratulations!', style: TextStyle(color: Colors.black)),
           content: Text('You have completed the quiz.',
               style: TextStyle(color: Colors.black)),
           actions: [
@@ -140,7 +152,7 @@ class _QuizPageState extends State<QuizPage> {
           ),
           SizedBox(
               height:
-                  availableHeight * 0.05), // Gap between instruction and image
+              availableHeight * 0.05), // Gap between instruction and image
           Container(
             height: availableHeight * 0.2,
             width: screenWidth * 0.8,
@@ -274,9 +286,9 @@ class _QuizPageState extends State<QuizPage> {
         onPressed: _difficulty == 'Hard'
             ? () => _checkAnswer(_answerController.text)
             : (_selectedChoiceIndex != null
-                ? () => _checkAnswer(_randomizedQuestions[_currentQuestionIndex]
-                    .choices![_selectedChoiceIndex!])
-                : null),
+            ? () => _checkAnswer(_randomizedQuestions[_currentQuestionIndex]
+            .choices![_selectedChoiceIndex!])
+            : null),
         child: Text(
           'Submit',
           style: TextStyle(
@@ -293,10 +305,10 @@ class _QuizPageState extends State<QuizPage> {
       height: 20,
       child: _errorMessage != null
           ? Text(
-              _errorMessage!,
-              style: TextStyle(color: Colors.red, fontSize: 18),
-              textAlign: TextAlign.center,
-            )
+        _errorMessage!,
+        style: TextStyle(color: Colors.red, fontSize: 18),
+        textAlign: TextAlign.center,
+      )
           : SizedBox.shrink(),
     );
   }
@@ -321,20 +333,20 @@ class _QuizPageState extends State<QuizPage> {
         child: _randomizedQuestions.isEmpty
             ? Center(child: CircularProgressIndicator())
             : Column(
-                children: [
-                  LinearProgressIndicator(value: _progress / 100),
-                  Expanded(
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: _buildQuestionWidget(),
-                        ),
-                      ),
-                    ),
+          children: [
+            LinearProgressIndicator(value: _progress / 100),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: _buildQuestionWidget(),
                   ),
-                ],
+                ),
               ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
