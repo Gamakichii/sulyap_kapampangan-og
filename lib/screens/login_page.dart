@@ -16,7 +16,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    // Dispose controllers to avoid memory leaks
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -32,13 +31,16 @@ class _LoginPageState extends State<LoginPage> {
       if (querySnapshot.docs.isNotEmpty) {
         final userData = querySnapshot.docs.first.data();
 
-        // Assuming you store hashed passwords, use appropriate comparison here
         if (userData['password'] == _passwordController.text.trim()) {
-          // Login successful - navigate to the HomePage with the username
+          // Ensure 'points' is initialized to 0 if it's null
+          userData['points'] = userData['points'] ?? 0;
+
           print('Login successful');
-          Navigator.pushNamed(context, '/home', arguments: {'userData':userData, 'username': _usernameController.text.trim()});
+          Navigator.pushNamed(context, '/home', arguments: {
+            'userData': userData,
+            'username': _usernameController.text.trim()
+          });
         } else {
-          // Incorrect password
           _showErrorDialog('Login Failed', 'Incorrect Password.');
         }
       } else {
@@ -85,12 +87,14 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarIconBrightness: Brightness.dark, // Replacing deprecated `SystemUiOverlayStyle.light`
+          statusBarIconBrightness: Brightness
+              .dark, // Replacing deprecated `SystemUiOverlayStyle.light`
         ),
         iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Center(
-        child: SingleChildScrollView( // Add SingleChildScrollView to prevent overflow on small screens
+        child: SingleChildScrollView(
+          // Add SingleChildScrollView to prevent overflow on small screens
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -120,7 +124,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Form(
                       key: _formKey,
-                      autovalidateMode: AutovalidateMode.onUserInteraction, // Immediate validation feedback
+                      autovalidateMode: AutovalidateMode
+                          .onUserInteraction, // Immediate validation feedback
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -156,7 +161,8 @@ class _LoginPageState extends State<LoginPage> {
                             controller: _usernameController,
                             decoration: InputDecoration(
                               labelText: 'Username',
-                              prefixIcon: Icon(Icons.person, color: Color(0xFFB7A6E0)),
+                              prefixIcon:
+                                  Icon(Icons.person, color: Color(0xFFB7A6E0)),
                               labelStyle: TextStyle(color: Colors.grey),
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.8),
@@ -179,7 +185,8 @@ class _LoginPageState extends State<LoginPage> {
                             controller: _passwordController,
                             decoration: InputDecoration(
                               labelText: 'Password',
-                              prefixIcon: Icon(Icons.lock, color: Color(0xFFB7A6E0)),
+                              prefixIcon:
+                                  Icon(Icons.lock, color: Color(0xFFB7A6E0)),
                               labelStyle: TextStyle(color: Colors.grey),
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.8),
@@ -216,7 +223,8 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               child: Text(
                                 'Login',
-                                style: TextStyle(color: Colors.white, fontSize: 18),
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18),
                               ),
                             ),
                           ),
