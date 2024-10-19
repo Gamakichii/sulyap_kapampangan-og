@@ -112,6 +112,8 @@ class _QuizPageState extends State<QuizPage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          _buildErrorMessage(),
+          SizedBox(height: availableHeight * 0.02),
           Text(
             'Select the correct Kapampangan word for each image',
             style: TextStyle(
@@ -121,7 +123,9 @@ class _QuizPageState extends State<QuizPage> {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: availableHeight * 0.2), // Reduced spacing
+          SizedBox(
+              height:
+                  availableHeight * 0.05), // Gap between instruction and image
           Container(
             height: availableHeight * 0.2,
             width: screenWidth * 0.8,
@@ -133,21 +137,26 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
           ),
-          SizedBox(height: availableHeight * 0.02), // Slightly reduced spacing
+          SizedBox(
+              height: availableHeight *
+                  0.05), // Gap between image and choices (same as above)
           Container(
-            height: availableHeight * 0.4,
+            height: availableHeight * 0.3,
             child: _buildChoices(),
           ),
-          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
-          _buildSubmitButton(width: 1000),
-          SizedBox(height: 20),
-          _buildErrorMessage(),
+          SizedBox(
+              height: availableHeight *
+                  0.01), // Reduced gap between choices and submit button
+          _buildSubmitButton(width: 1000), // Width set to 1000
         ],
       );
     } else if (_difficulty == 'Medium') {
+      // Medium mode remains unchanged
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          _buildErrorMessage(),
+          SizedBox(height: availableHeight * 0.02),
           Text(
             _randomizedQuestions[_currentQuestionIndex].question!,
             style: Theme.of(context)
@@ -158,16 +167,17 @@ class _QuizPageState extends State<QuizPage> {
           ),
           SizedBox(height: availableHeight * 0.05),
           Container(
-            height: availableHeight * 0.5,
+            height: availableHeight * 0.3,
             child: _buildChoices(),
           ),
-          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
-          _buildSubmitButton(width: 1000),
-          SizedBox(height: 20),
-          _buildErrorMessage(),
+          SizedBox(
+              height: availableHeight *
+                  0.01), // Reduced gap between choices and submit button
+          _buildSubmitButton(width: 1000), // Width set to 1000
         ],
       );
     } else {
+      // Hard mode remains unchanged
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -190,15 +200,14 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
           ),
-          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
+          SizedBox(height: availableHeight * 0.03),
           _buildSubmitButton(width: screenWidth * 0.8),
-          SizedBox(height: 20),
+          SizedBox(height: 45),
           _buildErrorMessage(),
         ],
       );
     }
   }
-
 
   Widget _buildChoices() {
     return GridView.builder(
@@ -273,7 +282,7 @@ class _QuizPageState extends State<QuizPage> {
               style: TextStyle(color: Colors.red, fontSize: 18),
               textAlign: TextAlign.center,
             )
-          : null,
+          : SizedBox.shrink(),
     );
   }
 
