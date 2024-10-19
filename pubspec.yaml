@@ -20,6 +20,7 @@ dev_dependencies:
     sdk: flutter
   build_runner: ^2.0.0
   objectbox_generator: 4.0.2
+  image_picker: ^0.8.7+4
 
 flutter:
   uses-material-design: true
@@ -28,8 +29,42 @@ flutter:
     - assets/background2.png
     - assets/background3.png
     - assets/background4.png
-    - assets/car.png
-    - assets/cap.png
-    - assets/chair.png
-    - assets/door.png
-    - assets/egg.png
+    - assets/logo.png
+    - assets/logo_purple.png
+    - assets/easy_mode_images/buac.png
+    - assets/easy_mode_images/bale.png
+    - assets/easy_mode_images/mabayat.png
+    - assets/easy_mode_images/kotsi.png
+    - assets/easy_mode_images/asu.png
+    - assets/easy_mode_images/awang.png
+    - assets/easy_mode_images/bitis.png
+    - assets/easy_mode_images/dalan.png
+    - assets/easy_mode_images/danum.png
+    - assets/easy_mode_images/dutung.png
+    - assets/easy_mode_images/ebun.png
+    - assets/easy_mode_images/kayli.png
+    - assets/easy_mode_images/kupia.png
+    - assets/easy_mode_images/luklukan.png
+    - assets/easy_mode_images/lupa.png
+    - assets/easy_mode_images/malutu.png
+    - assets/easy_mode_images/manuk.png
+    - assets/easy_mode_images/marimla.png
+    - assets/easy_mode_images/matua.png
+    - assets/easy_mode_images/pabanglu.png
+    - assets/easy_mode_images/pasbul.png
+    - assets/easy_mode_images/pisamban.png
+    - assets/easy_mode_images/pitudturan.png
+    - assets/easy_mode_images/punu.png
+    - assets/easy_mode_images/tanaman.png
+    - assets/easy_mode_images/yelu.png
+    - assets/easy_mode_images/pamangan.png
+    - assets/avatars/avatar1.png
+    - assets/avatars/avatar2.png
+    - assets/avatars/avatar3.png
+    - assets/avatars/avatar4.png
+    - assets/avatars/avatar5.png
+    - assets/avatars/avatar6.png
+    - assets/avatars/avatar7.png
+    - assets/avatars/avatar8.png
+    - assets/avatars/avatar9.png
+

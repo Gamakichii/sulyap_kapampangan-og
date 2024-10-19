@@ -21,20 +21,18 @@ class _QuizPageState extends State<QuizPage> {
   String? _errorMessage;
   String? _difficulty;
   String? _username;
+  int? _selectedChoiceIndex;
+  TextEditingController _answerController = TextEditingController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_difficulty == null) {
-      {
-        final args = ModalRoute
-            .of(context)!
-            .settings
-            .arguments as Map<String, dynamic>;
-        _difficulty = args['difficulty'];
-        _username = args['username'];
-        _loadQuestions();
-      }
+      final args =
+      ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      _difficulty = args['difficulty'];
+      _username = args['username'];
+      _loadQuestions();
     }
   }
 
@@ -48,14 +46,16 @@ class _QuizPageState extends State<QuizPage> {
     });
   }
 
-  void _checkAnswer(int selectedIndex) {
+  void _checkAnswer(String answer) {
     if (_randomizedQuestions.isEmpty) return;
 
-    if (_randomizedQuestions[_currentQuestionIndex].choices[selectedIndex] ==
-        _randomizedQuestions[_currentQuestionIndex].correctAnswer) {
+    if (answer.toLowerCase() ==
+        _randomizedQuestions[_currentQuestionIndex]
+            .correctAnswer
+            .toLowerCase()) {
       setState(() {
         _isAnswerCorrect = true;
-        _progress += 20;
+        _progress += 10;
         _errorMessage = null;
 
         if (_progress >= 100) {
@@ -64,6 +64,8 @@ class _QuizPageState extends State<QuizPage> {
           _currentQuestionIndex =
               (_currentQuestionIndex + 1) % _randomizedQuestions.length;
           _hintUsed = false;
+          _selectedChoiceIndex = null;
+          _answerController.clear();
         }
       });
     } else {
@@ -96,193 +98,208 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-  void _useHint() {
-    if (!_hintUsed && _randomizedQuestions.isNotEmpty) {
-      setState(() {
-        var currentQuestion = _randomizedQuestions[_currentQuestionIndex];
-        List<String> choices = List.from(currentQuestion.choices);
-        int correctIndex = choices.indexOf(currentQuestion.correctAnswer);
-
-        int indexToRemove;
-        do {
-          indexToRemove = Random().nextInt(choices.length);
-        } while (indexToRemove == correctIndex);
-
-        choices.removeAt(indexToRemove);
-        currentQuestion.choices = choices;
-
-        _hintUsed = true;
-      });
+  Widget _buildQuestionWidget() {
+    if (_difficulty == 'Easy') {
+      return Column(
+        children: [
+          Text(
+            'Select the correct Kapampangan word for each image',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 70),
+          Container(
+            height: 230,
+            width: double.infinity,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(
+                _randomizedQuestions[_currentQuestionIndex].imagePath!,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+          SizedBox(height: 130),
+          _buildChoices(),
+          SizedBox(height: 75),
+          _buildSubmitButton(),
+        ],
+      );
+    } else if (_difficulty == 'Medium') {
+      return Column(
+        children: [
+          Text(
+            _randomizedQuestions[_currentQuestionIndex].question!,
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(color: Colors.black),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          _buildChoices(),
+          SizedBox(height: 20),
+          _buildSubmitButton(),
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          Text(
+            _randomizedQuestions[_currentQuestionIndex].question!,
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(color: Colors.black),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          TextField(
+            controller: _answerController,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter your answer',
+            ),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => _checkAnswer(_answerController.text),
+            child: Text('Submit'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFB7A6E0),
+              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+            ),
+          ),
+        ],
+      );
     }
+  }
+
+  Widget _buildChoices() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: _randomizedQuestions[_currentQuestionIndex].choices!.length,
+      itemBuilder: (context, index) {
+        bool isSelected = _selectedChoiceIndex == index;
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isSelected ? Colors.deepPurple : Color(0xFFB7A6E0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+          onPressed: () {
+            setState(() {
+              _selectedChoiceIndex = index;
+            });
+          },
+          child: Text(
+            _randomizedQuestions[_currentQuestionIndex].choices![index],
+            style: TextStyle(color: Colors.white, fontSize: 25),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 180, vertical: 15),
+        backgroundColor:
+        _selectedChoiceIndex != null ? Color(0xFFB7A6E0) : Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+      ),
+      onPressed: _selectedChoiceIndex != null
+          ? () => _checkAnswer(_randomizedQuestions[_currentQuestionIndex]
+          .choices![_selectedChoiceIndex!])
+          : null,
+      child: Text(
+        'Submit',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Color(0xFFB7A6E0),
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
+        title: Text(
+          'Quiz - $_difficulty',
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge
+              ?.copyWith(color: Colors.black),
+        ),
+      ),
       body: SafeArea(
-        top: false,
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/background3.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: _randomizedQuestions.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : Column(
-            children: [
-              AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                iconTheme: IconThemeData(color: Colors.white),
-                title: Text(
-                  'Quiz - $_difficulty',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(color: Colors.white),
+        child: _randomizedQuestions.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+          children: [
+            LinearProgressIndicator(value: _progress / 100),
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  _errorMessage!,
+                  style: TextStyle(color: Colors.red, fontSize: 18),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              SizedBox(height: 10),
-              LinearProgressIndicator(value: _progress / 100),
-              SizedBox(height: 10),
-              if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    _errorMessage!,
-                    style: TextStyle(color: Colors.red, fontSize: 18),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              Expanded(
+            Expanded(
+              child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Instruction Text
-                      Text(
-                        'Select the correct Kapampangan word for each image',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 20), // Reduced space before image
-                      Container(
-                        height: 200,
-                        width: double.infinity,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.asset(
-                            _randomizedQuestions[_currentQuestionIndex]
-                                .imagePath,
-                            fit: BoxFit.contain, // Prevents cropping
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      if (_difficulty != 'Easy' &&
-                          _randomizedQuestions[_currentQuestionIndex]
-                              .question !=
-                              null)
-                        Text(
-                          _randomizedQuestions[_currentQuestionIndex]
-                              .question!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(color: Colors.white),
-                          textAlign: TextAlign.center,
-                        ),
-                      SizedBox(height: 50),
-                      // Expanded container for choices
-                      Expanded(
-                        flex: 2, // Make the choices area bigger
-                        child: GridView.builder(
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2, // 2 columns
-                            childAspectRatio: 2, // Adjust the aspect ratio as needed
-                            crossAxisSpacing: 10, // Space between columns
-                            mainAxisSpacing: 10, // Space between rows
-                          ),
-                          itemCount: _randomizedQuestions[_currentQuestionIndex].choices.length,
-                          itemBuilder: (context, index) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(
-                                    sigmaX: 10, sigmaY: 10),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(
-                                        color:
-                                        Colors.white.withOpacity(0.2)),
-                                  ),
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius.circular(15),
-                                      ),
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                    onPressed: () => _checkAnswer(index),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 8),
-                                      child: Text(
-                                        _randomizedQuestions[_currentQuestionIndex].choices[index],
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 25),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: _buildQuestionWidget(),
                 ),
               ),
-              BottomNavigationBar(
-                backgroundColor: Colors.transparent,
-                unselectedItemColor: Colors.white70,
-                selectedItemColor: Colors.white,
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home, color: Colors.white),
-                    label: 'Home',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.lightbulb, color: Colors.white),
-                    label: 'Hint',
-                  ),
-                ],
-                onTap: (index) {
-                  if (index == 0) {
-                    Navigator.pushNamed(context, '/home');
-                  } else if (index == 1 && !_hintUsed) {
-                    _useHint();
-                  }
-                },
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        unselectedItemColor: Colors.black,
+        selectedItemColor: Colors.black,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, color: Color(0xFFB7A6E0)),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.lightbulb, color: Color(0xFFB7A6E0)),
+            label: 'Hint',
+          ),
+        ],
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushNamed(context, '/home', arguments: _username);
+          } else if (index == 1 && !_hintUsed) {
+            // Implement hint functionality
+          }
+        },
       ),
     );
   }

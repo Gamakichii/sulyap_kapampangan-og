@@ -11,10 +11,7 @@ class LandingPage extends StatelessWidget {
         onTap: () => Navigator.pushNamed(context, '/login'),
         child: Container(
           decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/background1.png'),
-              fit: BoxFit.cover,
-            ),
+            color: Color(0xFFB7A6E0), // Background color
           ),
           child: SafeArea(
             child: Stack(
@@ -30,9 +27,17 @@ class LandingPage extends StatelessWidget {
                     ),
                     Column(
                       children: [
+                        Image.asset(
+                          'assets/logo.png', // Add the correct path to the image file
+                          width: 200, // Set width as desired
+                          height: 200, // Set height as desired
+                        ),
+                        SizedBox(height: 16), // Space between the image and the title
                         Text(
                           'Sulyap Kapampangan',
-                          style: Theme.of(context).textTheme.displayLarge,
+                          style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                            color: Colors.white, // Text color
+                          ),
                         ),
                         Text(
                           'Pamagaral keng penibatan',
@@ -41,6 +46,7 @@ class LandingPage extends StatelessWidget {
                               .displayMedium!
                               .copyWith(
                             fontSize: 16, // Reduced font size
+                            color: Colors.white, // Text color
                           ),
                         ),
                         SizedBox(height: 20),
@@ -56,7 +62,10 @@ class LandingPage extends StatelessWidget {
                   child: Center(
                     child: Text(
                       'Tap anywhere to start',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(
+                        color: Colors.white, // White text color
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
