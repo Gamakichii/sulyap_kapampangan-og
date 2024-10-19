@@ -59,7 +59,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
         content: Text(message, style: TextStyle(color: Colors.black)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pushNamed(context, '/profile', arguments: {'username': username, 'userData': userData}),
+            onPressed: () => Navigator.pop(context),
             child: Text('OK', style: TextStyle(color: Colors.black)),
           ),
         ],
