@@ -121,7 +121,7 @@ class _QuizPageState extends State<QuizPage> {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: availableHeight * 0.02),
+          SizedBox(height: availableHeight * 0.2), // Reduced spacing
           Container(
             height: availableHeight * 0.2,
             width: screenWidth * 0.8,
@@ -133,13 +133,13 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
           ),
-          SizedBox(height: availableHeight * 0.02),
+          SizedBox(height: availableHeight * 0.02), // Slightly reduced spacing
           Container(
             height: availableHeight * 0.4,
             child: _buildChoices(),
           ),
-          SizedBox(height: 10),
-          _buildSubmitButton(width: 180),
+          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
+          _buildSubmitButton(width: 1000),
           SizedBox(height: 20),
           _buildErrorMessage(),
         ],
@@ -161,8 +161,8 @@ class _QuizPageState extends State<QuizPage> {
             height: availableHeight * 0.5,
             child: _buildChoices(),
           ),
-          SizedBox(height: 10),
-          _buildSubmitButton(width: 180),
+          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
+          _buildSubmitButton(width: 1000),
           SizedBox(height: 20),
           _buildErrorMessage(),
         ],
@@ -190,7 +190,7 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
           ),
-          SizedBox(height: 10),
+          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
           _buildSubmitButton(width: screenWidth * 0.8),
           SizedBox(height: 20),
           _buildErrorMessage(),
@@ -198,6 +198,7 @@ class _QuizPageState extends State<QuizPage> {
       );
     }
   }
+
 
   Widget _buildChoices() {
     return GridView.builder(
