@@ -4,6 +4,7 @@ import 'dart:math';
 import '../objectbox.dart';
 import '../models/quiz_question.dart';
 import '../objectbox.g.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class QuizPage extends StatefulWidget {
   const QuizPage({Key? key}) : super(key: key);
@@ -92,16 +93,38 @@ class _QuizPageState extends State<QuizPage> {
     }
   }
 
-  void _updateUserLevel() {
-    if (_difficulty == 'Easy' && (userData?['level'] ?? 1) < 2) {
-      userData?['level'] = 2; // Set level to 2 for Easy completion
-    } else if (_difficulty == 'Medium' && (userData?['level'] ?? 2) < 3) {
-      userData?['level'] = 3; // Set level to 3 for Medium completion
-    }
+  Future<void> _updateUserLevel() async {
+    final usersCollection = FirebaseFirestore.instance.collection('users');
 
-    // Update user data in Firestore or your database
-    // Assuming you have a method to save user data
+    try {
+      // Query to find the user document by username
+      final snapshot = await usersCollection
+          .where('username', isEqualTo: _username) // Use the class variable for username
+          .limit(1) // Limit to one user
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Determine the new level based on the difficulty
+        int newLevel = userData?['level'] ?? 1; // Default to level 1 if not set
+
+        if (_difficulty == 'Easy' && newLevel < 2) {
+          newLevel = 2; // Set level to 2 for Easy completion
+        } else if (_difficulty == 'Medium' && newLevel < 3) {
+          newLevel = 3; // Set level to 3 for Medium completion
+        }
+
+        // Update the specific document with the new level
+        await snapshot.docs.first.reference.update({'level': newLevel});
+        print('User level updated successfully to level $newLevel');
+      } else {
+        print('No user found with username: $_username');
+      }
+    } catch (e) {
+      print('Error updating user level: $e');
+    }
   }
+
+
 
   void _showCongratsDialog() {
     showDialog(
