@@ -10,80 +10,38 @@ class HomePage extends StatelessWidget {
     final Map<String, dynamic> userData = arguments['userData'];
 
     int points = userData['points'] ?? 0;
-    String avatarPath = userData['avatar']; // Retrieve avatar path directly
+    String avatarPath = userData['avatar'] ?? '';
     int level = userData['level'];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF3F5F7), // Softer background tone
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(), // Smooth scrolling
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 600, // Optional: Limit width on larger screens
-              ),
+              constraints: const BoxConstraints(maxWidth: 600),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildWelcomeHeader(username), // Rectangle 1
+                    _buildWelcomeHeader(context, username, userData),
+                    const SizedBox(height: 40),
+                    _buildAvatar(avatarPath, username, userData, context),
                     const SizedBox(height: 30),
-
-                    // Avatar with updated logic
-                    GestureDetector(
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        '/profile',
-                        arguments: {'username': username, 'userData': userData},
-                      ),
-                      child: CircleAvatar(
-                        radius: 62, // Avatar 124x124 px
-                        backgroundImage: avatarPath != null &&
-                                avatarPath.isNotEmpty
-                            ? AssetImage(avatarPath) // Use a local asset image
-                            : AssetImage(
-                                'assets/images/avatar1.png'), // Fallback local asset image
-                        backgroundColor: Colors.grey.withOpacity(0.2),
-                        child: avatarPath == null || avatarPath.isEmpty
-                            ? const Icon(
-                                Icons
-                                    .person, // Placeholder for anonymous profile
-                                size: 40,
-                                color: Colors.white,
-                              )
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Points Display
-                    Text(
-                      'Points: $points',
-                      style: const TextStyle(
-                        fontFamily: 'ADLaM Display',
-                        fontSize: 32,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 41),
-
-                    // Select Difficulty Header
+                    _buildPointsDisplay(points),
+                    const SizedBox(height: 35),
                     const Text(
                       'Select a Difficulty',
                       style: TextStyle(
-                        fontFamily: 'ADLaM Display',
-                        fontSize: 32,
-                        color: Colors.black,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 20),
-
-                    // Difficulty Buttons and Logout in 2x2 Grid
-                    _buildDifficultyAndLogoutGrid(
-                        level, context, username, userData),
+                    const SizedBox(height: 24),
+                    _buildDifficultyGrid(level, context, username, userData),
                   ],
                 ),
               ),
@@ -94,39 +52,115 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildWelcomeHeader(String username) {
-    return Container(
-      width: double.infinity,
-      height: 134,
+  Widget _buildWelcomeHeader(
+      BuildContext context, String username, Map<String, dynamic> userData) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
+      padding: const EdgeInsets.all(18.0),
       decoration: BoxDecoration(
-        color: const Color(0xFFB7A6E0),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-            color: Colors.black.withOpacity(0.4),
-            width: 2), // Lighter border opacity
+        color: const Color(0xFF6A4C93),
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1), // Stronger shadow effect
-            offset: const Offset(0, 5), // Larger offset for more prominence
-            blurRadius: 20, // Increased blur for aesthetic shadow
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
-      alignment: Alignment.center,
-      child: Text(
-        'Welcome back, $username!',
-        style: const TextStyle(
-          fontFamily: 'ADLaM Display',
-          fontSize: 32,
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Icon(Icons.person_outline, color: Colors.white, size: 32),
+          Expanded(
+            child: Center(
+              child: Text(
+                'Welcome back, $username!',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () => Navigator.pushNamed(
+              context,
+              '/profile',
+              arguments: {'username': username, 'userData': userData},
+            ),
+            child: const Icon(Icons.settings, color: Colors.white, size: 32),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDifficultyAndLogoutGrid(int level, BuildContext context,
+  Widget _buildAvatar(
+      String avatarPath, String username, Map<String, dynamic> userData, BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/profile',
+        arguments: {'username': username, 'userData': userData},
+      ),
+      child: Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          CircleAvatar(
+            radius: 80, // Slightly larger for prominence
+            backgroundImage: avatarPath.isNotEmpty
+                ? AssetImage(avatarPath)
+                : const AssetImage('assets/images/avatar1.png'),
+            backgroundColor: Colors.grey[300],
+            child: avatarPath.isEmpty
+                ? const Icon(
+              Icons.person,
+              size: 60,
+              color: Colors.white70,
+            )
+                : null,
+          ),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.greenAccent.shade700,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: const Icon(
+              Icons.check_circle,
+              size: 28,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPointsDisplay(int points) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.star, size: 32, color: Colors.amber),
+        const SizedBox(width: 8),
+        Text(
+          'Points: $points',
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDifficultyGrid(int level, BuildContext context,
       String username, Map<String, dynamic> userData) {
     return GridView.count(
       shrinkWrap: true,
@@ -147,69 +181,55 @@ class HomePage extends StatelessWidget {
 
   Widget _buildDifficultyButton(String difficulty, bool isUnlocked,
       BuildContext context, String username, Map<String, dynamic> userData) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-            color: Colors.black.withOpacity(0.4), width: 2), // Lighter border
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3), // Stronger shadow
-            offset: const Offset(0, 12), // Increased offset
-            blurRadius: 24, // Aesthetic blur
+    return ElevatedButton(
+      onPressed: isUnlocked
+          ? () => Navigator.pushNamed(
+        context,
+        '/difficulty',
+        arguments: {
+          'difficulty': difficulty,
+          'username': username,
+          'userData': userData,
+        },
+      )
+          : null,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isUnlocked
+            ? const Color(0xFFB58DB6)
+            : Colors.grey[400],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        padding: const EdgeInsets.all(20),
+        shadowColor: Colors.black45,
+        elevation: 8,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            difficulty,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Icon(
+            isUnlocked ? Icons.lock_open : Icons.lock,
+            size: 24,
+            color: Colors.white70,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            isUnlocked ? 'Unlocked' : 'Locked',
+            style: const TextStyle(
+              fontSize: 18,
+              color: Colors.white70,
+            ),
           ),
         ],
-      ),
-      child: ElevatedButton(
-        onPressed: isUnlocked
-            ? () => Navigator.pushNamed(
-                  context,
-                  '/difficulty',
-                  arguments: {
-                    'difficulty': difficulty,
-                    'username': username,
-                    'userData': userData
-                  },
-                )
-            : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFB7A6E0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          minimumSize: const Size(160, 134),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              difficulty,
-              style: const TextStyle(
-                fontFamily: 'ADLaM Display',
-                fontSize: 32,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Status',
-              style: const TextStyle(
-                fontFamily: 'Actor',
-                fontSize: 20,
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isUnlocked ? 'Unlocked' : 'Locked',
-              style: const TextStyle(
-                fontFamily: 'ADLaM Display',
-                fontSize: 20,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -217,21 +237,21 @@ class HomePage extends StatelessWidget {
   Widget _buildLogoutButton(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-      icon: const Icon(Icons.logout, color: Colors.black),
+      icon: const Icon(Icons.logout, size: 30, color: Colors.white),
       label: const Text(
         'Logout',
         style: TextStyle(
-          fontFamily: 'ADLaM Display',
-          fontSize: 32,
-          color: Colors.black,
+          fontSize: 24,
+          color: Colors.white,
         ),
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFB7A6E0),
+        backgroundColor: const Color(0xFF6A4C93),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(18),
         ),
-        minimumSize: const Size(160, 134),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        elevation: 10,
       ),
     );
   }
