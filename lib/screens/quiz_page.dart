@@ -85,6 +85,7 @@ class _QuizPageState extends State<QuizPage> {
 
     if (isCorrect) {
       if (_questionsAnswered >= _randomizedQuestions.length) {
+        _updateUserLevel(); // Update the user's level when quiz is completed
         _showCongratsDialog();
       } else {
         setState(() {
@@ -120,6 +121,36 @@ class _QuizPageState extends State<QuizPage> {
       }
     } catch (e) {
       print('Error updating user points: $e');
+    }
+  }
+
+  Future<void> _updateUserLevel() async {
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+
+    try {
+      // Query to find the user document by username
+      final snapshot = await usersCollection
+          .where('username', isEqualTo: _username) // Use the class variable for username
+          .limit(1) // Limit to one user
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Determine the new level based on the difficulty
+        int newLevel = userData?['level'] ?? 1; // Default to level 1 if not set
+
+        if (_difficulty == 'Easy' && newLevel < 2) {
+          newLevel = 2; // Set level to 2 for Easy completion
+        } else if (_difficulty == 'Medium' && newLevel < 3) {
+          newLevel = 3; // Set level to 3 for Medium completion
+        }
+        // Update the specific document with the new level
+        await snapshot.docs.first.reference.update({'level': newLevel});
+        print('User level updated successfully to level $newLevel');
+      } else {
+        print('No user found with username: $_username');
+      }
+    } catch (e) {
+      print('Error updating user level: $e');
     }
   }
 
@@ -395,7 +426,7 @@ class _QuizPageState extends State<QuizPage> {
           if (index == 0) {
             Navigator.pushNamed(context, '/home', arguments: {
               'username': _username,
-              'userData': {...?userData, 'points': _points}
+              'userData': userData
             });
           } else if (index == 1 && !_hintUsed) {
             // Implement hint functionality
