@@ -11,33 +11,55 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage>
+    with SingleTickerProviderStateMixin {
   String? selectedAvatar;
   File? _imageFile; // To store the selected image file
   late String username; // Initialize username
   late Map<String, dynamic> userData; // Initialize userData
+  bool _isLoading = false; // Loading state
 
   // ImagePicker instance
   final ImagePicker _picker = ImagePicker();
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    )..forward(); // Start the animation
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final routeArgs =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
     if (routeArgs == null) {
-      // Handle the case where no user data is provided
       username = 'Guest'; // Default value if no username is provided
       userData = {}; // Default empty map if no userData is provided
     } else {
       username = routeArgs['username'] as String; // Extract username
-      userData = routeArgs['userData'] as Map<String, dynamic>; // Extract userData
-      selectedAvatar = userData['avatar']; // Set the selected avatar from userData
+      userData =
+          routeArgs['userData'] as Map<String, dynamic>; // Extract userData
+      selectedAvatar =
+          userData['avatar']; // Set the selected avatar from userData
     }
   }
 
   // Method to allow user to pick an image from the gallery
   Future<void> _pickImageFromGallery() async {
+    setState(() {
+      _isLoading = true; // Show loading indicator
+    });
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
@@ -46,6 +68,9 @@ class _ProfilePageState extends State<ProfilePage> {
         selectedAvatar = null; // Reset avatar when a custom image is selected
       });
     }
+    setState(() {
+      _isLoading = false; // Hide loading indicator
+    });
   }
 
   // List of available avatar image paths
@@ -67,8 +92,8 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Color(0xFFB7A6E0),
-          title: Text(
+          backgroundColor: const Color(0xFFB7A6E0),
+          title: const Text(
             'Select Avatar',
             style: TextStyle(color: Colors.white),
           ),
@@ -79,7 +104,8 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 Expanded(
                   child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3, // Number of avatars per row
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
@@ -91,13 +117,24 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () {
                           setState(() {
                             selectedAvatar = avatarPath;
-                            userData['avatar'] = selectedAvatar; // Set selected avatar
-                            _imageFile = null; // Reset custom image when an avatar is selected
+                            userData['avatar'] =
+                                selectedAvatar; // Set selected avatar
+                            _imageFile =
+                                null; // Reset custom image when an avatar is selected
                           });
-                          _saveAvatarToDatabase(selectedAvatar!); // Save to database
+                          _saveAvatarToDatabase(
+                              selectedAvatar!); // Save to database
                           Navigator.pop(context); // Close the dialog
                         },
-                        child: Image.asset(avatarPath),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: selectedAvatar == avatarPath
+                                ? Border.all(color: Colors.blue, width: 3)
+                                : null,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Image.asset(avatarPath),
+                        ),
                       );
                     },
                   ),
@@ -107,7 +144,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Navigator.pop(context);
                     _pickImageFromGallery(); // Pick image from gallery
                   },
-                  child: Text(
+                  child: const Text(
                     'Upload from Gallery',
                     style: TextStyle(color: Colors.white),
                   ),
@@ -142,6 +179,73 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  // Method to edit bio
+  void _editBio() {
+    final TextEditingController bioController =
+        TextEditingController(text: userData['bio']);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(
+              0xFFB7A6E0), // Match the avatar selection dialog color
+          title: const Text('Edit Bio', style: TextStyle(color: Colors.white)),
+          content: TextField(
+            controller: bioController,
+            decoration: const InputDecoration(
+                hintText: 'Enter your bio',
+                hintStyle: TextStyle(color: Colors.white70)),
+            maxLines: 3,
+            style: const TextStyle(color: Colors.white), // Text color
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child:
+                  const Text('Cancel', style: TextStyle(color: Colors.white)),
+            ),
+            TextButton(
+              onPressed: () async {
+                String newBio = bioController.text;
+                setState(() {
+                  userData['bio'] = newBio; // Update local userData
+                });
+                await _saveBioToDatabase(newBio); // Save to database
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Save', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Method to save bio to the database
+  Future<void> _saveBioToDatabase(String bio) async {
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+
+    try {
+      // Update the user's bio in Firestore using the username
+      await usersCollection
+          .where('username', isEqualTo: username)
+          .limit(1) // Limit to one user
+          .get()
+          .then((snapshot) {
+        if (snapshot.docs.isNotEmpty) {
+          // Update the specific document with the new bio
+          snapshot.docs.first.reference.update({'bio': bio});
+        }
+      });
+    } catch (e) {
+      print('Error updating bio: $e');
+      _showErrorDialog(context, 'Error', 'Failed to update bio.');
+    }
+  }
+
   // Method to delete account
   Future<void> _deleteAccount(BuildContext context) async {
     final usersCollection = FirebaseFirestore.instance.collection('users');
@@ -150,28 +254,31 @@ class _ProfilePageState extends State<ProfilePage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
+        title: const Text(
           'Delete Account',
           style: TextStyle(color: Colors.black),
         ),
-        content: Text(
+        content: const Text(
           'Are you sure you want to delete your account?',
           style: TextStyle(color: Colors.black),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false), // Cancel
-            child: Text('No', style: TextStyle(color: Colors.black)),
+            child: const Text('No', style: TextStyle(color: Colors.black)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true), // Confirm
-            child: Text('Yes', style: TextStyle(color: Colors.black)),
+            child: const Text('Yes', style: TextStyle(color: Colors.black)),
           ),
         ],
       ),
     );
 
     if (confirm == true) {
+      setState(() {
+        _isLoading = true; // Show loading indicator
+      });
       try {
         // Find the user by username and delete the document
         final querySnapshot = await usersCollection
@@ -185,12 +292,16 @@ class _ProfilePageState extends State<ProfilePage> {
           Navigator.pushNamedAndRemoveUntil(
             context,
             '/login',
-                (route) => false, // Remove all routes from the stack
+            (route) => false, // Remove all routes from the stack
           );
         }
       } catch (e) {
         print('Error deleting account: $e');
         _showErrorDialog(context, 'Error', 'Failed to delete the account.');
+      } finally {
+        setState(() {
+          _isLoading = false; // Hide loading indicator
+        });
       }
     }
   }
@@ -200,12 +311,12 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title, style: TextStyle(color: Colors.black)),
-        content: Text(message, style: TextStyle(color: Colors.black)),
+        title: Text(title, style: const TextStyle(color: Colors.black)),
+        content: Text(message, style: const TextStyle(color: Colors.black)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('OK', style: TextStyle(color: Colors.black)),
+            child: const Text('OK', style: TextStyle(color: Colors.black)),
           ),
         ],
       ),
@@ -219,144 +330,165 @@ class _ProfilePageState extends State<ProfilePage> {
     Navigator.pushNamedAndRemoveUntil(
       context,
       '/login',
-          (route) => false, // Remove all routes from the stack
+      (route) => false, // Remove all routes from the stack
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Changed background color to white
       appBar: AppBar(
-        title: Text('Profile', style: TextStyle(color: Colors.black)),
+        title: const Text('Profile', style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.light,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Go back to the previous screen
+          },
+        ),
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const SizedBox(height: 40), // Add space at the top
+              FadeTransition(
+                opacity: _animation,
+                child: Text(
+                  'Welcome, $username', // Use extracted username
+                  style: const TextStyle(
+                    fontSize: 36, // Increased font size for prominence
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center, // Center the text
+                ),
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap:
+                    _showAvatarSelectionDialog, // Open avatar selection or image picker
+                child: CircleAvatar(
+                  radius: 120, // Increased size for prominence
+                  backgroundImage: _imageFile != null
+                      ? FileImage(_imageFile!) // Display the selected image
+                      : selectedAvatar != null
+                          ? AssetImage(
+                              selectedAvatar!) // Display selected avatar
+                          : null,
+                  child: _imageFile == null && selectedAvatar == null
+                      ? const Icon(Icons.person,
+                          size: 80, color: Colors.white70) // Default icon
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 30),
+              // Display the user's bio content only
               Text(
-                'Welcome, $username', // Use extracted username
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                userData['bio'] ??
+                    'No bio available', // Access bio from userData
+                style: const TextStyle(
+                  fontSize: 18,
                   color: Colors.black,
                 ),
               ),
-              SizedBox(height: 20),
-              Center(
-                child: GestureDetector(
-                  onTap: _showAvatarSelectionDialog, // Open avatar selection or image picker
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: _imageFile != null
-                        ? FileImage(_imageFile!) // Display the selected image
-                        : selectedAvatar != null
-                        ? AssetImage(selectedAvatar!) // Display selected avatar
-                        : null,
-                    child: _imageFile == null && selectedAvatar == null
-                        ? Icon(Icons.person, size: 50, color: Colors.white) // Default icon
-                        : null,
-                  ),
-                ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _editBio, // Call edit bio function
+                child: const Text('Edit Bio'),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 30),
               Expanded(
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          side: BorderSide(
-                            color: Colors.black.withOpacity(0.5),
-                            width: 1,
-                          ),
-                        ),
+                      _buildProfileButton(
+                        label: 'Update Password',
                         onPressed: () {
                           Navigator.pushNamed(
                             context,
                             '/updatePassword',
-                            arguments: username, // Pass username to update password
+                            arguments:
+                                username, // Pass username to update password
                           );
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(
-                            'Update Password',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
+                        icon: Icons.lock, // Icon for Update Password
                       ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          side: BorderSide(
-                            color: Colors.red.withOpacity(0.5),
-                            width: 1,
-                          ),
-                        ),
-                        onPressed: () => _deleteAccount(context), // Call delete account logic
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(
-                            'Delete Account',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
+                      const SizedBox(height: 20),
+                      _buildProfileButton(
+                        label: 'Delete Account',
+                        onPressed: () => _deleteAccount(
+                            context), // Call delete account logic
+                        color: Colors.red,
+                        icon: Icons.delete, // Icon for Delete Account
                       ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          side: BorderSide(
-                            color: Colors.black.withOpacity(0.5),
-                            width: 1,
-                          ),
-                        ),
+                      const SizedBox(height: 20),
+                      _buildProfileButton(
+                        label: 'Logout',
                         onPressed: () {
                           _logout(context); // Logout logic
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(
-                            'Logout',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
+                        icon: Icons.logout, // Icon for Logout
+                        isSmall:
+                            true, // Indicate that this button should be smaller
                       ),
                     ],
                   ),
                 ),
               ),
+              if (_isLoading) // Show loading indicator if loading
+                const CircularProgressIndicator(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build profile buttons with icons
+  Widget _buildProfileButton({
+    required String label,
+    required VoidCallback onPressed,
+    Color? color,
+    required IconData icon,
+    bool isSmall =
+        false, // New parameter to indicate if the button should be smaller
+  }) {
+    return SizedBox(
+      width: double.infinity, // Make button full width
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color ?? const Color(0xFF6A4C93), // Default color
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          padding: EdgeInsets.symmetric(
+            vertical:
+                isSmall ? 12 : 16, // Smaller padding for the logout button
+            horizontal: 30,
+          ),
+          elevation: 8,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white), // Icon for the button
+            const SizedBox(width: 10), // Space between icon and text
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );
