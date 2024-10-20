@@ -128,24 +128,27 @@ class _QuizPageState extends State<QuizPage> {
     final usersCollection = FirebaseFirestore.instance.collection('users');
 
     try {
-      // Query to find the user document by username
       final snapshot = await usersCollection
-          .where('username', isEqualTo: _username) // Use the class variable for username
-          .limit(1) // Limit to one user
+          .where('username', isEqualTo: _username)
+          .limit(1)
           .get();
 
       if (snapshot.docs.isNotEmpty) {
-        // Determine the new level based on the difficulty
-        int newLevel = userData?['level'] ?? 1; // Default to level 1 if not set
+        int newLevel = userData?['level'] ?? 1;
 
         if (_difficulty == 'Easy' && newLevel < 2) {
-          newLevel = 2; // Set level to 2 for Easy completion
+          newLevel = 2;
         } else if (_difficulty == 'Medium' && newLevel < 3) {
-          newLevel = 3; // Set level to 3 for Medium completion
+          newLevel = 3;
         }
-        // Update the specific document with the new level
+
         await snapshot.docs.first.reference.update({'level': newLevel});
         print('User level updated successfully to level $newLevel');
+
+        // Update local userData
+        setState(() {
+          userData?['level'] = newLevel; // Update the local level
+        });
       } else {
         print('No user found with username: $_username');
       }
@@ -154,13 +157,13 @@ class _QuizPageState extends State<QuizPage> {
     }
   }
 
+
   void _showCongratsDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title:
-              Text('Congratulations!', style: TextStyle(color: Colors.black)),
+          title: Text('Congratulations!', style: TextStyle(color: Colors.black)),
           content: Text('You have completed the quiz. Final points: $_points',
               style: TextStyle(color: Colors.black)),
           actions: [
@@ -176,6 +179,7 @@ class _QuizPageState extends State<QuizPage> {
       },
     );
   }
+
 
   Widget _buildQuestionWidget() {
     final screenHeight = MediaQuery.of(context).size.height;
