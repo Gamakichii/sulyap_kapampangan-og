@@ -91,6 +91,7 @@ class _LoginPageState extends State<LoginPage> {
               .dark, // Replacing deprecated `SystemUiOverlayStyle.light`
         ),
         iconTheme: IconThemeData(color: Colors.black),
+        leading: Container(),
       ),
       body: Center(
         child: SingleChildScrollView(
