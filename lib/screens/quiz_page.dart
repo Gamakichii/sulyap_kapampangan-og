@@ -36,6 +36,10 @@ class _QuizPageState extends State<QuizPage> {
   String _pointChangeMessage = '';
   Color _pointChangeColor = Colors.green;
 
+  // Flag to indicate whether the quiz has started
+  bool _quizStarted = false;
+  bool _isRandomized = false; // Flag to control question randomization
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -52,12 +56,23 @@ class _QuizPageState extends State<QuizPage> {
       userData = routeArgs['userData'] as Map<String, dynamic>;
       _points = userData?['points'] ?? 0;
 
-      _loadQuestions();
+      // Start the quiz and load questions
+      _startQuiz();
       // Fetch current points when user data is set
       _fetchCurrentPoints();
     } else {
       print('Missing or invalid route arguments.');
     }
+  }
+
+  void _startQuiz() {
+    setState(() {
+      _quizStarted = true; // Indicate that the quiz has started
+      if (!_isRandomized) {
+        _loadQuestions(); // Load and randomize questions only once
+        _isRandomized = true; // Set to true after loading questions
+      }
+    });
   }
 
   void _fetchCurrentPoints() async {
@@ -93,8 +108,7 @@ class _QuizPageState extends State<QuizPage> {
 
   void _setAvailableChoices() {
     if (_randomizedQuestions.isNotEmpty) {
-      _availableChoices =
-          List.of(_randomizedQuestions[_currentQuestionIndex].choices ?? []);
+      _availableChoices = List.of(_randomizedQuestions[_currentQuestionIndex].choices ?? []);
     }
   }
 
@@ -154,17 +168,22 @@ class _QuizPageState extends State<QuizPage> {
 
       await _updateUserPoints();
 
-      if (_questionsAnswered >= _randomizedQuestions.length) {
+      // Randomize after answering correctly
+      if (_questionsAnswered < _randomizedQuestions.length) {
+        final previousIndex = _currentQuestionIndex;
+        _currentQuestionIndex = Random().nextInt(_randomizedQuestions.length); // Pick a new random question
+
+        while (_answeredQuestionsIndex.contains(_currentQuestionIndex) || _currentQuestionIndex == previousIndex) {
+          _currentQuestionIndex = Random().nextInt(_randomizedQuestions.length);
+        }
+
+        _hintUsed = false;
+        _selectedChoiceIndex = null;
+        _answerController.clear();
+        _setAvailableChoices();
+      } else {
         _updateUserLevel();
         _showCongratsDialog();
-      } else {
-        setState(() {
-          _currentQuestionIndex++;
-          _hintUsed = false;
-          _selectedChoiceIndex = null;
-          _answerController.clear();
-          _setAvailableChoices();
-        });
       }
     } else {
       setState(() {
@@ -299,7 +318,7 @@ class _QuizPageState extends State<QuizPage> {
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
       height: 50,
-      color: _isPointChangeVisible ? _pointChangeColor : Colors.deepPurple, // Violet/green/red background
+      color: _isPointChangeVisible ? _pointChangeColor : Colors.deepPurple,
       curve: Curves.easeInOut,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -343,8 +362,7 @@ class _QuizPageState extends State<QuizPage> {
             Text(
               _difficulty == 'Easy'
                   ? 'Select the correct Kapampangan word for each image'
-                  : currentQuestion.question ??
-                  'Error: Question text is missing.',
+                  : currentQuestion.question ?? 'Error: Question text is missing.',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 20,
@@ -538,6 +556,7 @@ class _QuizPageState extends State<QuizPage> {
         ],
         onTap: (index) {
           if (index == 0) {
+            // Only navigate back to home, no randomization of questions
             Navigator.pushNamed(context, '/home',
                 arguments: {'username': _username, 'userData': userData});
           } else if (index == 1 && !_hintUsed) {
