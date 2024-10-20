@@ -14,11 +14,11 @@ class HomePage extends StatelessWidget {
     int level = userData['level'];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F5F7), // Softer background tone
+      backgroundColor: const Color(0xFFF3F5F7),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(), // Smooth scrolling
+            physics: const BouncingScrollPhysics(),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 600),
               child: Padding(
@@ -52,8 +52,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildWelcomeHeader(
-      BuildContext context, String username, Map<String, dynamic> userData) {
+  Widget _buildWelcomeHeader(BuildContext context, String username, Map<String, dynamic> userData) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutCubic,
@@ -99,8 +98,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(
-      String avatarPath, String username, Map<String, dynamic> userData, BuildContext context) {
+  Widget _buildAvatar(String avatarPath, String username, Map<String, dynamic> userData, BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.pushNamed(
         context,
@@ -111,7 +109,7 @@ class HomePage extends StatelessWidget {
         alignment: Alignment.bottomRight,
         children: [
           CircleAvatar(
-            radius: 80, // Slightly larger for prominence
+            radius: 80,
             backgroundImage: avatarPath.isNotEmpty
                 ? AssetImage(avatarPath)
                 : const AssetImage('assets/images/avatar1.png'),
@@ -160,8 +158,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildDifficultyGrid(int level, BuildContext context,
-      String username, Map<String, dynamic> userData) {
+  Widget _buildDifficultyGrid(int level, BuildContext context, String username, Map<String, dynamic> userData) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -171,8 +168,7 @@ class HomePage extends StatelessWidget {
       childAspectRatio: 1.2,
       children: [
         _buildDifficultyButton('Easy', level >= 1, context, username, userData),
-        _buildDifficultyButton(
-            'Medium', level >= 2, context, username, userData),
+        _buildDifficultyButton('Medium', level >= 2, context, username, userData),
         _buildDifficultyButton('Hard', level >= 3, context, username, userData),
         _buildLogoutButton(context),
       ],
@@ -183,15 +179,42 @@ class HomePage extends StatelessWidget {
       BuildContext context, String username, Map<String, dynamic> userData) {
     return ElevatedButton(
       onPressed: isUnlocked
-          ? () => Navigator.pushNamed(
-        context,
-        '/difficulty',
-        arguments: {
-          'difficulty': difficulty,
-          'username': username,
-          'userData': userData,
-        },
-      )
+          ? () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Start Quiz', style: TextStyle(color: Colors.black)),
+              content: Text('Are you ready to start the $difficulty quiz?', style: TextStyle(color: Colors.black)),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: Text('Cancel', style: TextStyle(color: Colors.black)),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Close the dialog
+                    Navigator.of(context).pop();
+                    // Navigate to the Quiz Page directly after closing the dialog
+                    Navigator.pushNamed(
+                      context,
+                      '/quiz',
+                      arguments: {
+                        'difficulty': difficulty,
+                        'username': username,
+                        'userData': userData,
+                      },
+                    );
+                  },
+                  child: Text('OK', style: TextStyle(color: Colors.black)),
+                ),
+              ],
+            );
+          },
+        );
+      }
           : null,
       style: ElevatedButton.styleFrom(
         backgroundColor: isUnlocked

@@ -50,8 +50,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
     }
   }
 
-
-  void _showDialog(String title, String message, username, userData) {
+  void _showDialog(String title, String message, String? username, Map<String, dynamic>? userData) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -59,7 +58,20 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
         content: Text(message, style: TextStyle(color: Colors.black)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              // Navigate back to the profile page after OK is pressed
+              Navigator.pop(context); // Close the dialog first
+              if (userData != null) {
+                Navigator.pushReplacementNamed(
+                  context,
+                  '/profile',
+                  arguments: {
+                    'username': username,
+                    'userData': userData,
+                  },
+                );
+              }
+            },
             child: Text('OK', style: TextStyle(color: Colors.black)),
           ),
         ],

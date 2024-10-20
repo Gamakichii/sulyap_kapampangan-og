@@ -27,15 +27,15 @@ class _QuizPageState extends State<QuizPage> {
   TextEditingController _answerController = TextEditingController();
   int _points = 0;
   int _questionsAnswered = 0;
-  late List<String> _availableChoices; // Added to track available choices.
-  final int _hintPointDeduction = 5; // Set points to deduct for using a hint.
+  late List<String> _availableChoices;
+  final int _hintPointDeduction = 5;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final routeArgs =
-    ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
     if (routeArgs != null &&
         routeArgs.containsKey('username') &&
@@ -59,36 +59,35 @@ class _QuizPageState extends State<QuizPage> {
         .find();
     setState(() {
       _randomizedQuestions = questions..shuffle();
-      _setAvailableChoices(); // Initialize available choices
+      _setAvailableChoices();
       print(
           'Loaded ${_randomizedQuestions.length} questions for difficulty $_difficulty');
     });
   }
 
   void _setAvailableChoices() {
-    // Initialize the available choices for the current question
     if (_randomizedQuestions.isNotEmpty) {
       _availableChoices =
           List.of(_randomizedQuestions[_currentQuestionIndex].choices ?? []);
     }
   }
 
-  // Hint function to remove one incorrect choice and deduct points
   void _useHint() {
-    // Check if the user can afford to use a hint
     if (_points >= _hintPointDeduction) {
-      if (_availableChoices.length > 2) { // Ensure there are enough choices to provide a hint
-        List<String> incorrectChoices = _availableChoices.where(
-                (choice) => choice != _randomizedQuestions[_currentQuestionIndex].correctAnswer).toList();
+      if (_availableChoices.length > 2) {
+        List<String> incorrectChoices = _availableChoices
+            .where((choice) =>
+                choice !=
+                _randomizedQuestions[_currentQuestionIndex].correctAnswer)
+            .toList();
 
         if (incorrectChoices.isNotEmpty) {
-          final choiceToRemove = (incorrectChoices..shuffle()).first; // Pick a random incorrect choice
+          final choiceToRemove = (incorrectChoices..shuffle()).first;
           setState(() {
-            _availableChoices.remove(choiceToRemove); // Remove the choice
-            _hintUsed = true; // Mark hint as used
-            _points -= _hintPointDeduction; // Deduct points
+            _availableChoices.remove(choiceToRemove);
+            _hintUsed = true;
+            _points -= _hintPointDeduction;
 
-            // Call to update user points in Firestore
             _updateUserPoints();
           });
         } else {
@@ -132,7 +131,7 @@ class _QuizPageState extends State<QuizPage> {
 
     if (isCorrect) {
       if (_questionsAnswered >= _randomizedQuestions.length) {
-        _updateUserLevel(); // Update the user's level when quiz is completed
+        _updateUserLevel();
         _showCongratsDialog();
       } else {
         setState(() {
@@ -140,7 +139,7 @@ class _QuizPageState extends State<QuizPage> {
           _hintUsed = false;
           _selectedChoiceIndex = null;
           _answerController.clear();
-          _setAvailableChoices(); // Reset available choices for the next question
+          _setAvailableChoices();
         });
       }
     }
@@ -159,7 +158,6 @@ class _QuizPageState extends State<QuizPage> {
         await snapshot.docs.first.reference.update({'points': _points});
         print('User points updated successfully to $_points');
 
-        // Update local userData
         setState(() {
           userData?['points'] = _points;
         });
@@ -192,9 +190,8 @@ class _QuizPageState extends State<QuizPage> {
         await snapshot.docs.first.reference.update({'level': newLevel});
         print('User level updated successfully to level $newLevel');
 
-        // Update local userData
         setState(() {
-          userData?['level'] = newLevel; // Update the local level
+          userData?['level'] = newLevel;
         });
       } else {
         print('No user found with username: $_username');
@@ -209,10 +206,21 @@ class _QuizPageState extends State<QuizPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title:
-          Text('Congratulations!', style: TextStyle(color: Colors.black)),
-          content: Text('You have completed the quiz. Final points: $_points',
-              style: TextStyle(color: Colors.black)),
+          title: Center(
+              child: Text('Congratulations!',
+                  style: TextStyle(color: Colors.black))),
+          content: Center(
+            child: SizedBox(
+              // Prevent overflow by adding constraints
+              width: 250, // Limit the width to prevent overflow
+              child: Text(
+                'You have completed the quiz. Final points: $_points',
+                style: TextStyle(
+                    color: Colors.black, fontSize: 16), // Reduce font size
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
           actions: [
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.black)),
@@ -253,7 +261,7 @@ class _QuizPageState extends State<QuizPage> {
               _difficulty == 'Easy'
                   ? 'Select the correct Kapampangan word for each image'
                   : currentQuestion.question ??
-                  'Error: Question text is missing.',
+                      'Error: Question text is missing.',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 20,
@@ -284,13 +292,11 @@ class _QuizPageState extends State<QuizPage> {
             else
               TextField(
                 controller: _answerController,
-                style:
-                TextStyle(color: Colors.black), // Set text color to black
+                style: TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Enter your answer',
-                  hintStyle: TextStyle(
-                      color: Colors.grey), // Optional: style for hint text
+                  hintStyle: TextStyle(color: Colors.grey),
                 ),
               ),
             SizedBox(height: 20),
@@ -311,7 +317,7 @@ class _QuizPageState extends State<QuizPage> {
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemCount: _availableChoices.length, // Use available choices instead
+      itemCount: _availableChoices.length,
       itemBuilder: (context, index) {
         bool isSelected = _selectedChoiceIndex == index;
         return Card(
@@ -322,22 +328,22 @@ class _QuizPageState extends State<QuizPage> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor:
-              isSelected ? Colors.deepPurple : Color(0xFFB7A6E0),
+                  isSelected ? Colors.deepPurple : Color(0xFFB7A6E0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
             ),
             onPressed: () {
               setState(() {
-                _selectedChoiceIndex = index; // Select the choice
+                _selectedChoiceIndex = index;
               });
             },
             child: Text(
-              _availableChoices[index], // Display available choices
+              _availableChoices[index],
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
           ),
-        ); // Closing the Card widget
+        );
       },
     );
   }
@@ -358,8 +364,8 @@ class _QuizPageState extends State<QuizPage> {
         onPressed: _difficulty == 'Hard'
             ? () => _checkAnswer(_answerController.text)
             : (_selectedChoiceIndex != null
-            ? () => _checkAnswer(_availableChoices[_selectedChoiceIndex!]) // Check using selected choice
-            : null),
+                ? () => _checkAnswer(_availableChoices[_selectedChoiceIndex!])
+                : null),
         child: Text(
           'Submit',
           style: TextStyle(
@@ -375,18 +381,24 @@ class _QuizPageState extends State<QuizPage> {
     return Container(
       height: 20,
       child: _errorMessage != null
-          ? Container(
-        padding: EdgeInsets.symmetric(horizontal: 8.0),
-        decoration: BoxDecoration(
-          color: Colors.redAccent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          _errorMessage!,
-          style: TextStyle(color: Colors.white, fontSize: 18),
-          textAlign: TextAlign.center,
-        ),
-      )
+          ? Center(
+              // Centering the error message
+              child: Container(
+                constraints: BoxConstraints(
+                    maxWidth: 300), // Limit max width to prevent overflow
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  _errorMessage!,
+                  style: TextStyle(
+                      color: Colors.white, fontSize: 16), // Reduced font size
+                  textAlign: TextAlign.center, // Center the text
+                ),
+              ),
+            )
           : SizedBox.shrink(),
     );
   }
@@ -416,28 +428,28 @@ class _QuizPageState extends State<QuizPage> {
         child: _randomizedQuestions.isEmpty
             ? Center(child: CircularProgressIndicator())
             : Column(
-          children: [
-            LinearProgressIndicator(value: _progress / 100),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Points: $_points',
-                style:
-                TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: _buildQuestionWidget(),
+                children: [
+                  LinearProgressIndicator(value: _progress / 100),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Points: $_points',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
+                  Expanded(
+                    child: Center(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildQuestionWidget(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
@@ -458,7 +470,7 @@ class _QuizPageState extends State<QuizPage> {
             Navigator.pushNamed(context, '/home',
                 arguments: {'username': _username, 'userData': userData});
           } else if (index == 1 && !_hintUsed) {
-            _useHint(); // Call the hint function here
+            _useHint();
           }
         },
       ),

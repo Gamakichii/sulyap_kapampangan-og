@@ -4,7 +4,6 @@ import 'package:sulyap_kapampangan/screens/login_page.dart';
 import 'models/quiz_question.dart';
 import 'screens/landing_page.dart';
 import 'screens/home_page.dart';
-import 'screens/difficulty_selection_page.dart';
 import 'screens/quiz_page.dart';
 import 'screens/profile_page.dart';
 import 'screens/update_password_page.dart';
@@ -65,9 +64,10 @@ class SulyapKapampanganApp extends StatelessWidget {
               username: ModalRoute.of(context)!.settings.arguments as String,
             ),
         '/home': (context) => HomePage(),
-        '/difficulty': (context) => DifficultySelectionPage(),
         '/quiz': (context) => QuizPage(),
       },
     );
   }
 }
+
+
