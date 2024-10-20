@@ -45,9 +45,6 @@ class _ProfilePageState extends State<ProfilePage> {
         _imageFile = File(pickedFile.path); // Store the picked image file
         selectedAvatar = null; // Reset avatar when a custom image is selected
       });
-      // Here you would upload the image to your backend and update userData with the new avatar URL
-      // For example:
-      // _uploadImageAndSaveUrl(_imageFile!);
     }
   }
 

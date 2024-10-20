@@ -9,7 +9,7 @@ class HomePage extends StatelessWidget {
     final String username = arguments['username'];
     final Map<String, dynamic> userData = arguments['userData'];
 
-    int points = userData['points'];
+    int points = userData['points'] ?? 0;
     String avatarPath = userData['avatar']; // Retrieve avatar path directly
     int level = userData['level'];
 
@@ -40,16 +40,19 @@ class HomePage extends StatelessWidget {
                       ),
                       child: CircleAvatar(
                         radius: 62, // Avatar 124x124 px
-                        backgroundImage: avatarPath != null && avatarPath.isNotEmpty
+                        backgroundImage: avatarPath != null &&
+                                avatarPath.isNotEmpty
                             ? AssetImage(avatarPath) // Use a local asset image
-                            : AssetImage('assets/images/avatar1.png'), // Fallback local asset image
+                            : AssetImage(
+                                'assets/images/avatar1.png'), // Fallback local asset image
                         backgroundColor: Colors.grey.withOpacity(0.2),
                         child: avatarPath == null || avatarPath.isEmpty
                             ? const Icon(
-                          Icons.person, // Placeholder for anonymous profile
-                          size: 40,
-                          color: Colors.white,
-                        )
+                                Icons
+                                    .person, // Placeholder for anonymous profile
+                                size: 40,
+                                color: Colors.white,
+                              )
                             : null,
                       ),
                     ),
@@ -79,7 +82,8 @@ class HomePage extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // Difficulty Buttons and Logout in 2x2 Grid
-                    _buildDifficultyAndLogoutGrid(level, context, username, userData),
+                    _buildDifficultyAndLogoutGrid(
+                        level, context, username, userData),
                   ],
                 ),
               ),
@@ -97,7 +101,9 @@ class HomePage extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFB7A6E0),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black.withOpacity(0.4), width: 2), // Lighter border opacity
+        border: Border.all(
+            color: Colors.black.withOpacity(0.4),
+            width: 2), // Lighter border opacity
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1), // Stronger shadow effect
@@ -120,7 +126,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildDifficultyAndLogoutGrid(int level, BuildContext context, String username, Map<String, dynamic> userData) {
+  Widget _buildDifficultyAndLogoutGrid(int level, BuildContext context,
+      String username, Map<String, dynamic> userData) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -130,18 +137,21 @@ class HomePage extends StatelessWidget {
       childAspectRatio: 1.2,
       children: [
         _buildDifficultyButton('Easy', level >= 1, context, username, userData),
-        _buildDifficultyButton('Medium', level >= 2, context, username, userData),
+        _buildDifficultyButton(
+            'Medium', level >= 2, context, username, userData),
         _buildDifficultyButton('Hard', level >= 3, context, username, userData),
         _buildLogoutButton(context),
       ],
     );
   }
 
-  Widget _buildDifficultyButton(String difficulty, bool isUnlocked, BuildContext context, String username, Map<String, dynamic> userData) {
+  Widget _buildDifficultyButton(String difficulty, bool isUnlocked,
+      BuildContext context, String username, Map<String, dynamic> userData) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black.withOpacity(0.4), width: 2), // Lighter border
+        border: Border.all(
+            color: Colors.black.withOpacity(0.4), width: 2), // Lighter border
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3), // Stronger shadow
@@ -153,10 +163,14 @@ class HomePage extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isUnlocked
             ? () => Navigator.pushNamed(
-          context,
-          '/difficulty',
-          arguments: {'difficulty': difficulty, 'username': username, 'userData': userData},
-        )
+                  context,
+                  '/difficulty',
+                  arguments: {
+                    'difficulty': difficulty,
+                    'username': username,
+                    'userData': userData
+                  },
+                )
             : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFB7A6E0),

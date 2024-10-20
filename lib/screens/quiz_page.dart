@@ -4,6 +4,7 @@ import 'dart:math';
 import '../objectbox.dart';
 import '../models/quiz_question.dart';
 import '../objectbox.g.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class QuizPage extends StatefulWidget {
   const QuizPage({Key? key}) : super(key: key);
@@ -21,18 +22,33 @@ class _QuizPageState extends State<QuizPage> {
   String? _errorMessage;
   String? _difficulty;
   String? _username;
+  Map<String, dynamic>? userData;
   int? _selectedChoiceIndex;
   TextEditingController _answerController = TextEditingController();
+  int _points = 0;
+  int _questionsAnswered = 0;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     if (_difficulty == null) {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-      _difficulty = args['difficulty'];
-      _username = args['username'];
-      _loadQuestions();
+      final routeArgs =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+      if (routeArgs != null &&
+          routeArgs.containsKey('username') &&
+          routeArgs.containsKey('difficulty') &&
+          routeArgs.containsKey('userData')) {
+        _username = routeArgs['username'] as String;
+        _difficulty = routeArgs['difficulty'] as String;
+        userData = routeArgs['userData'] as Map<String, dynamic>;
+        _points = userData?['points'] ?? 0;
+
+        _loadQuestions();
+      } else {
+        print('Missing or invalid route arguments.');
+      }
     }
   }
 
@@ -46,33 +62,95 @@ class _QuizPageState extends State<QuizPage> {
     });
   }
 
-  void _checkAnswer(String answer) {
+  Future<void> _checkAnswer(String answer) async {
     if (_randomizedQuestions.isEmpty) return;
 
-    if (answer.toLowerCase() ==
-        _randomizedQuestions[_currentQuestionIndex]
-            .correctAnswer
-            .toLowerCase()) {
-      setState(() {
-        _isAnswerCorrect = true;
-        _progress += 20;
-        _errorMessage = null;
+    bool isCorrect = answer.toLowerCase() ==
+        _randomizedQuestions[_currentQuestionIndex].correctAnswer.toLowerCase();
 
-        if (_progress >= 100) {
-          _showCongratsDialog();
-        } else {
+    setState(() {
+      _isAnswerCorrect = isCorrect;
+      if (isCorrect) {
+        _points += 10;
+        _questionsAnswered++;
+        _progress =
+            (_questionsAnswered / _randomizedQuestions.length * 100).round();
+      } else {
+        _points = max(0, _points - 5);
+      }
+      _errorMessage = isCorrect ? null : 'Incorrect! Please try again.';
+    });
+
+    await _updateUserPoints();
+
+    if (isCorrect) {
+      if (_questionsAnswered >= _randomizedQuestions.length) {
+        _updateUserLevel(); // Update the user's level when quiz is completed
+        _showCongratsDialog();
+      } else {
+        setState(() {
           _currentQuestionIndex =
               (_currentQuestionIndex + 1) % _randomizedQuestions.length;
           _hintUsed = false;
           _selectedChoiceIndex = null;
           _answerController.clear();
+        });
+      }
+    }
+  }
+
+  Future<void> _updateUserPoints() async {
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+
+    try {
+      final snapshot = await usersCollection
+          .where('username', isEqualTo: _username)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        await snapshot.docs.first.reference.update({'points': _points});
+        print('User points updated successfully to $_points');
+
+        // Update local userData
+        setState(() {
+          userData?['points'] = _points;
+        });
+      } else {
+        print('No user found with username: $_username');
+      }
+    } catch (e) {
+      print('Error updating user points: $e');
+    }
+  }
+
+  Future<void> _updateUserLevel() async {
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+
+    try {
+      // Query to find the user document by username
+      final snapshot = await usersCollection
+          .where('username', isEqualTo: _username) // Use the class variable for username
+          .limit(1) // Limit to one user
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Determine the new level based on the difficulty
+        int newLevel = userData?['level'] ?? 1; // Default to level 1 if not set
+
+        if (_difficulty == 'Easy' && newLevel < 2) {
+          newLevel = 2; // Set level to 2 for Easy completion
+        } else if (_difficulty == 'Medium' && newLevel < 3) {
+          newLevel = 3; // Set level to 3 for Medium completion
         }
-      });
-    } else {
-      setState(() {
-        _isAnswerCorrect = false;
-        _errorMessage = 'Incorrect! Please try again.';
-      });
+        // Update the specific document with the new level
+        await snapshot.docs.first.reference.update({'level': newLevel});
+        print('User level updated successfully to level $newLevel');
+      } else {
+        print('No user found with username: $_username');
+      }
+    } catch (e) {
+      print('Error updating user level: $e');
     }
   }
 
@@ -83,13 +161,14 @@ class _QuizPageState extends State<QuizPage> {
         return AlertDialog(
           title:
               Text('Congratulations!', style: TextStyle(color: Colors.black)),
-          content: Text('You have completed the quiz.',
+          content: Text('You have completed the quiz. Final points: $_points',
               style: TextStyle(color: Colors.black)),
           actions: [
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.black)),
               onPressed: () {
-                Navigator.pushNamed(context, '/home', arguments: _username);
+                Navigator.pushReplacementNamed(context, '/home',
+                    arguments: {'username': _username, 'userData': userData});
               },
             ),
           ],
@@ -112,6 +191,8 @@ class _QuizPageState extends State<QuizPage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          _buildErrorMessage(),
+          SizedBox(height: availableHeight * 0.02),
           Text(
             'Select the correct Kapampangan word for each image',
             style: TextStyle(
@@ -121,7 +202,9 @@ class _QuizPageState extends State<QuizPage> {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: availableHeight * 0.2), // Reduced spacing
+          SizedBox(
+              height:
+                  availableHeight * 0.05), // Gap between instruction and image
           Container(
             height: availableHeight * 0.2,
             width: screenWidth * 0.8,
@@ -133,21 +216,26 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
           ),
-          SizedBox(height: availableHeight * 0.02), // Slightly reduced spacing
+          SizedBox(
+              height: availableHeight *
+                  0.05), // Gap between image and choices (same as above)
           Container(
-            height: availableHeight * 0.4,
+            height: availableHeight * 0.3,
             child: _buildChoices(),
           ),
-          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
-          _buildSubmitButton(width: 1000),
-          SizedBox(height: 20),
-          _buildErrorMessage(),
+          SizedBox(
+              height: availableHeight *
+                  0.01), // Reduced gap between choices and submit button
+          _buildSubmitButton(width: 1000), // Width set to 1000
         ],
       );
     } else if (_difficulty == 'Medium') {
+      // Medium mode remains unchanged
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          _buildErrorMessage(),
+          SizedBox(height: availableHeight * 0.02),
           Text(
             _randomizedQuestions[_currentQuestionIndex].question!,
             style: Theme.of(context)
@@ -158,16 +246,17 @@ class _QuizPageState extends State<QuizPage> {
           ),
           SizedBox(height: availableHeight * 0.05),
           Container(
-            height: availableHeight * 0.5,
+            height: availableHeight * 0.3,
             child: _buildChoices(),
           ),
-          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
-          _buildSubmitButton(width: 1000),
-          SizedBox(height: 20),
-          _buildErrorMessage(),
+          SizedBox(
+              height: availableHeight *
+                  0.01), // Reduced gap between choices and submit button
+          _buildSubmitButton(width: 1000), // Width set to 1000
         ],
       );
     } else {
+      // Hard mode remains unchanged
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -190,15 +279,14 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
           ),
-          SizedBox(height: availableHeight * 0.01), // Reduced spacing before submit button
+          SizedBox(height: availableHeight * 0.03),
           _buildSubmitButton(width: screenWidth * 0.8),
-          SizedBox(height: 20),
+          SizedBox(height: 45),
           _buildErrorMessage(),
         ],
       );
     }
   }
-
 
   Widget _buildChoices() {
     return GridView.builder(
@@ -273,7 +361,7 @@ class _QuizPageState extends State<QuizPage> {
               style: TextStyle(color: Colors.red, fontSize: 18),
               textAlign: TextAlign.center,
             )
-          : null,
+          : SizedBox.shrink(),
     );
   }
 
@@ -299,6 +387,14 @@ class _QuizPageState extends State<QuizPage> {
             : Column(
                 children: [
                   LinearProgressIndicator(value: _progress / 100),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Points: $_points',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                   Expanded(
                     child: Center(
                       child: SingleChildScrollView(
@@ -328,7 +424,10 @@ class _QuizPageState extends State<QuizPage> {
         ],
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushNamed(context, '/home', arguments: _username);
+            Navigator.pushNamed(context, '/home', arguments: {
+              'username': _username,
+              'userData': userData
+            });
           } else if (index == 1 && !_hintUsed) {
             // Implement hint functionality
           }

@@ -18,6 +18,8 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
   final _newPasswordController = TextEditingController();
 
   Future<void> _updatePassword() async {
+    Map<String, dynamic>? userData;
+
     try {
       final usersCollection = FirebaseFirestore.instance.collection('users');
       final querySnapshot = await usersCollection
@@ -26,7 +28,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
 
       if (querySnapshot.docs.isNotEmpty) {
         final userDoc = querySnapshot.docs.first;
-        final userData = userDoc.data();
+        userData = userDoc.data(); // Assign userData from the document
 
         if (userData['password'] == _currentPasswordController.text) {
           // If current password matches, update to the new password.
@@ -34,18 +36,22 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
             'password': _newPasswordController.text,
           });
 
-          _showDialog('Success', 'Password updated successfully!');
+          _showDialog('Success', 'Password updated successfully!', userData['username'], userData);
         } else {
-          _showDialog('Error', 'Current password is incorrect.');
+          _showDialog('Error', 'Current password is incorrect.', userData['username'], userData);
         }
+      } else {
+        _showDialog('Error', 'User not found.', null, null); // Handle case when user is not found
       }
     } catch (e) {
       print('Error updating password: $e');
-      _showDialog('Error', 'Failed to update the password.');
+      // Check if userData is not null before using it
+      _showDialog('Error', 'Failed to update the password.', userData?['username'], userData);
     }
   }
 
-  void _showDialog(String title, String message) {
+
+  void _showDialog(String title, String message, username, userData) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
