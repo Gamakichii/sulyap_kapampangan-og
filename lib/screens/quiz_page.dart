@@ -27,46 +27,93 @@ class _QuizPageState extends State<QuizPage> {
   TextEditingController _answerController = TextEditingController();
   int _points = 0;
   int _questionsAnswered = 0;
+  late List<String> _availableChoices; // Added to track available choices.
+  final int _hintPointDeduction = 5; // Set points to deduct for using a hint.
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (_difficulty == null) {
-      final routeArgs =
-          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final routeArgs =
+    ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
-      if (routeArgs != null &&
-          routeArgs.containsKey('username') &&
-          routeArgs.containsKey('difficulty') &&
-          routeArgs.containsKey('userData')) {
-        _username = routeArgs['username'] as String;
-        _difficulty = routeArgs['difficulty'] as String;
-        userData = routeArgs['userData'] as Map<String, dynamic>;
-        _points = userData?['points'] ?? 0;
+    if (routeArgs != null &&
+        routeArgs.containsKey('username') &&
+        routeArgs.containsKey('difficulty') &&
+        routeArgs.containsKey('userData')) {
+      _username = routeArgs['username'] as String;
+      _difficulty = routeArgs['difficulty'] as String;
+      userData = routeArgs['userData'] as Map<String, dynamic>;
+      _points = userData?['points'] ?? 0;
 
-        _loadQuestions();
-      } else {
-        print('Missing or invalid route arguments.');
-      }
+      _loadQuestions();
+    } else {
+      print('Missing or invalid route arguments.');
     }
   }
 
   void _loadQuestions() {
     final questions = objectbox.quizQuestionBox
-        .query(QuizQuestion_.difficulty.equals(_difficulty!))
+        .query(QuizQuestion_.difficulty.equals(_difficulty ?? ''))
         .build()
         .find();
     setState(() {
       _randomizedQuestions = questions..shuffle();
+      _setAvailableChoices(); // Initialize available choices
+      print(
+          'Loaded ${_randomizedQuestions.length} questions for difficulty $_difficulty');
     });
+  }
+
+  void _setAvailableChoices() {
+    // Initialize the available choices for the current question
+    if (_randomizedQuestions.isNotEmpty) {
+      _availableChoices =
+          List.of(_randomizedQuestions[_currentQuestionIndex].choices ?? []);
+    }
+  }
+
+  // Hint function to remove one incorrect choice and deduct points
+  void _useHint() {
+    // Check if the user can afford to use a hint
+    if (_points >= _hintPointDeduction) {
+      if (_availableChoices.length > 2) { // Ensure there are enough choices to provide a hint
+        List<String> incorrectChoices = _availableChoices.where(
+                (choice) => choice != _randomizedQuestions[_currentQuestionIndex].correctAnswer).toList();
+
+        if (incorrectChoices.isNotEmpty) {
+          final choiceToRemove = (incorrectChoices..shuffle()).first; // Pick a random incorrect choice
+          setState(() {
+            _availableChoices.remove(choiceToRemove); // Remove the choice
+            _hintUsed = true; // Mark hint as used
+            _points -= _hintPointDeduction; // Deduct points
+
+            // Call to update user points in Firestore
+            _updateUserPoints();
+          });
+        } else {
+          setState(() {
+            _errorMessage = "No incorrect choices available to remove!";
+          });
+        }
+      } else {
+        setState(() {
+          _errorMessage = "Not enough choices to use a hint!";
+        });
+      }
+    } else {
+      setState(() {
+        _errorMessage = "Not enough points to use a hint!";
+      });
+    }
   }
 
   Future<void> _checkAnswer(String answer) async {
     if (_randomizedQuestions.isEmpty) return;
 
     bool isCorrect = answer.toLowerCase() ==
-        _randomizedQuestions[_currentQuestionIndex].correctAnswer.toLowerCase();
+        (_randomizedQuestions[_currentQuestionIndex].correctAnswer ?? '')
+            .toLowerCase();
 
     setState(() {
       _isAnswerCorrect = isCorrect;
@@ -89,11 +136,11 @@ class _QuizPageState extends State<QuizPage> {
         _showCongratsDialog();
       } else {
         setState(() {
-          _currentQuestionIndex =
-              (_currentQuestionIndex + 1) % _randomizedQuestions.length;
+          _currentQuestionIndex++;
           _hintUsed = false;
           _selectedChoiceIndex = null;
           _answerController.clear();
+          _setAvailableChoices(); // Reset available choices for the next question
         });
       }
     }
@@ -157,13 +204,13 @@ class _QuizPageState extends State<QuizPage> {
     }
   }
 
-
   void _showCongratsDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Congratulations!', style: TextStyle(color: Colors.black)),
+          title:
+          Text('Congratulations!', style: TextStyle(color: Colors.black)),
           content: Text('You have completed the quiz. Final points: $_points',
               style: TextStyle(color: Colors.black)),
           actions: [
@@ -180,116 +227,78 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-
   Widget _buildQuestionWidget() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final safeAreaPadding = MediaQuery.of(context).padding;
-    final availableHeight = screenHeight -
-        safeAreaPadding.top -
-        safeAreaPadding.bottom -
-        kBottomNavigationBarHeight -
-        AppBar().preferredSize.height;
-
-    if (_difficulty == 'Easy') {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildErrorMessage(),
-          SizedBox(height: availableHeight * 0.02),
-          Text(
-            'Select the correct Kapampangan word for each image',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(
-              height:
-                  availableHeight * 0.05), // Gap between instruction and image
-          Container(
-            height: availableHeight * 0.2,
-            width: screenWidth * 0.8,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                _randomizedQuestions[_currentQuestionIndex].imagePath!,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-          SizedBox(
-              height: availableHeight *
-                  0.05), // Gap between image and choices (same as above)
-          Container(
-            height: availableHeight * 0.3,
-            child: _buildChoices(),
-          ),
-          SizedBox(
-              height: availableHeight *
-                  0.01), // Reduced gap between choices and submit button
-          _buildSubmitButton(width: 1000), // Width set to 1000
-        ],
-      );
-    } else if (_difficulty == 'Medium') {
-      // Medium mode remains unchanged
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildErrorMessage(),
-          SizedBox(height: availableHeight * 0.02),
-          Text(
-            _randomizedQuestions[_currentQuestionIndex].question!,
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(color: Colors.black),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: availableHeight * 0.05),
-          Container(
-            height: availableHeight * 0.3,
-            child: _buildChoices(),
-          ),
-          SizedBox(
-              height: availableHeight *
-                  0.01), // Reduced gap between choices and submit button
-          _buildSubmitButton(width: 1000), // Width set to 1000
-        ],
-      );
-    } else {
-      // Hard mode remains unchanged
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            _randomizedQuestions[_currentQuestionIndex].question!,
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(color: Colors.black),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: availableHeight * 0.05),
-          Container(
-            width: screenWidth * 0.8,
-            child: TextField(
-              controller: _answerController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter your answer',
-              ),
-            ),
-          ),
-          SizedBox(height: availableHeight * 0.03),
-          _buildSubmitButton(width: screenWidth * 0.8),
-          SizedBox(height: 45),
-          _buildErrorMessage(),
-        ],
-      );
+    if (_randomizedQuestions.isEmpty) {
+      return Center(child: Text('No questions available for this difficulty.'));
     }
+
+    final currentQuestion = _randomizedQuestions[_currentQuestionIndex];
+    if (currentQuestion == null) {
+      return Center(child: Text('Error: Current question is null.'));
+    }
+
+    return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildErrorMessage(),
+            SizedBox(height: 20),
+            Text(
+              _difficulty == 'Easy'
+                  ? 'Select the correct Kapampangan word for each image'
+                  : currentQuestion.question ??
+                  'Error: Question text is missing.',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+            if (_difficulty == 'Easy' && currentQuestion.imagePath != null) ...[
+              Container(
+                height: 200,
+                width: double.infinity,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    currentQuestion.imagePath!,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
+            if (_difficulty != 'Hard')
+              Container(
+                height: 200,
+                child: _buildChoices(),
+              )
+            else
+              TextField(
+                controller: _answerController,
+                style:
+                TextStyle(color: Colors.black), // Set text color to black
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter your answer',
+                  hintStyle: TextStyle(
+                      color: Colors.grey), // Optional: style for hint text
+                ),
+              ),
+            SizedBox(height: 20),
+            _buildSubmitButton(width: MediaQuery.of(context).size.width * 0.8),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildChoices() {
@@ -302,26 +311,33 @@ class _QuizPageState extends State<QuizPage> {
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemCount: _randomizedQuestions[_currentQuestionIndex].choices!.length,
+      itemCount: _availableChoices.length, // Use available choices instead
       itemBuilder: (context, index) {
         bool isSelected = _selectedChoiceIndex == index;
-        return ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected ? Colors.deepPurple : Color(0xFFB7A6E0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+        return Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+              isSelected ? Colors.deepPurple : Color(0xFFB7A6E0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+            onPressed: () {
+              setState(() {
+                _selectedChoiceIndex = index; // Select the choice
+              });
+            },
+            child: Text(
+              _availableChoices[index], // Display available choices
+              style: TextStyle(color: Colors.white, fontSize: 20),
             ),
           ),
-          onPressed: () {
-            setState(() {
-              _selectedChoiceIndex = index;
-            });
-          },
-          child: Text(
-            _randomizedQuestions[_currentQuestionIndex].choices![index],
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        );
+        ); // Closing the Card widget
       },
     );
   }
@@ -342,9 +358,8 @@ class _QuizPageState extends State<QuizPage> {
         onPressed: _difficulty == 'Hard'
             ? () => _checkAnswer(_answerController.text)
             : (_selectedChoiceIndex != null
-                ? () => _checkAnswer(_randomizedQuestions[_currentQuestionIndex]
-                    .choices![_selectedChoiceIndex!])
-                : null),
+            ? () => _checkAnswer(_availableChoices[_selectedChoiceIndex!]) // Check using selected choice
+            : null),
         child: Text(
           'Submit',
           style: TextStyle(
@@ -360,11 +375,18 @@ class _QuizPageState extends State<QuizPage> {
     return Container(
       height: 20,
       child: _errorMessage != null
-          ? Text(
-              _errorMessage!,
-              style: TextStyle(color: Colors.red, fontSize: 18),
-              textAlign: TextAlign.center,
-            )
+          ? Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          _errorMessage!,
+          style: TextStyle(color: Colors.white, fontSize: 18),
+          textAlign: TextAlign.center,
+        ),
+      )
           : SizedBox.shrink(),
     );
   }
@@ -374,43 +396,48 @@ class _QuizPageState extends State<QuizPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Color(0xFFB7A6E0),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.purple, Colors.deepPurple],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.white),
         title: Text(
           'Quiz - $_difficulty',
-          style: Theme.of(context)
-              .textTheme
-              .titleLarge
-              ?.copyWith(color: Colors.black),
+          style: TextStyle(color: Colors.white),
         ),
       ),
       body: SafeArea(
         child: _randomizedQuestions.isEmpty
             ? Center(child: CircularProgressIndicator())
             : Column(
-                children: [
-                  LinearProgressIndicator(value: _progress / 100),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Points: $_points',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: _buildQuestionWidget(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+          children: [
+            LinearProgressIndicator(value: _progress / 100),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Points: $_points',
+                style:
+                TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
+            ),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: _buildQuestionWidget(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
@@ -428,12 +455,10 @@ class _QuizPageState extends State<QuizPage> {
         ],
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushNamed(context, '/home', arguments: {
-              'username': _username,
-              'userData': userData
-            });
+            Navigator.pushNamed(context, '/home',
+                arguments: {'username': _username, 'userData': userData});
           } else if (index == 1 && !_hintUsed) {
-            // Implement hint functionality
+            _useHint(); // Call the hint function here
           }
         },
       ),
