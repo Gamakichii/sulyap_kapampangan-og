@@ -18,6 +18,7 @@ class _QuizPageState extends State<QuizPage> {
   int _currentQuestionIndex = 0;
   bool _isAnswerCorrect = true;
   List<QuizQuestion> _randomizedQuestions = [];
+  List<int> _answeredQuestionsIndex = [];
   bool _hintUsed = false;
   String? _errorMessage;
   String? _difficulty;
@@ -30,12 +31,17 @@ class _QuizPageState extends State<QuizPage> {
   late List<String> _availableChoices;
   final int _hintPointDeduction = 5;
 
+  // For managing points change notification
+  bool _isPointChangeVisible = false;
+  String _pointChangeMessage = '';
+  Color _pointChangeColor = Colors.green;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final routeArgs =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
     if (routeArgs != null &&
         routeArgs.containsKey('username') &&
@@ -47,8 +53,28 @@ class _QuizPageState extends State<QuizPage> {
       _points = userData?['points'] ?? 0;
 
       _loadQuestions();
+      // Fetch current points when user data is set
+      _fetchCurrentPoints();
     } else {
       print('Missing or invalid route arguments.');
+    }
+  }
+
+  void _fetchCurrentPoints() async {
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+    try {
+      final snapshot = await usersCollection
+          .where('username', isEqualTo: _username)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          _points = snapshot.docs.first['points'] ?? 0;
+        });
+      }
+    } catch (e) {
+      print('Error fetching user points: $e');
     }
   }
 
@@ -57,11 +83,11 @@ class _QuizPageState extends State<QuizPage> {
         .query(QuizQuestion_.difficulty.equals(_difficulty ?? ''))
         .build()
         .find();
+
     setState(() {
-      _randomizedQuestions = questions..shuffle();
+      _randomizedQuestions = (questions..shuffle()).take(10).toList();
       _setAvailableChoices();
-      print(
-          'Loaded ${_randomizedQuestions.length} questions for difficulty $_difficulty');
+      print('Loaded ${_randomizedQuestions.length} questions for difficulty $_difficulty');
     });
   }
 
@@ -77,8 +103,8 @@ class _QuizPageState extends State<QuizPage> {
       if (_availableChoices.length > 2) {
         List<String> incorrectChoices = _availableChoices
             .where((choice) =>
-                choice !=
-                _randomizedQuestions[_currentQuestionIndex].correctAnswer)
+        choice !=
+            _randomizedQuestions[_currentQuestionIndex].correctAnswer)
             .toList();
 
         if (incorrectChoices.isNotEmpty) {
@@ -87,7 +113,7 @@ class _QuizPageState extends State<QuizPage> {
             _availableChoices.remove(choiceToRemove);
             _hintUsed = true;
             _points -= _hintPointDeduction;
-
+            _showPointsAnimation('Points decreased by $_hintPointDeduction', Colors.red);
             _updateUserPoints();
           });
         } else {
@@ -114,22 +140,20 @@ class _QuizPageState extends State<QuizPage> {
         (_randomizedQuestions[_currentQuestionIndex].correctAnswer ?? '')
             .toLowerCase();
 
-    setState(() {
-      _isAnswerCorrect = isCorrect;
-      if (isCorrect) {
+    if (isCorrect && !_answeredQuestionsIndex.contains(_currentQuestionIndex)) {
+      setState(() {
+        _isAnswerCorrect = true;
         _points += 10;
         _questionsAnswered++;
         _progress =
             (_questionsAnswered / _randomizedQuestions.length * 100).round();
-      } else {
-        _points = max(0, _points - 5);
-      }
-      _errorMessage = isCorrect ? null : 'Incorrect! Please try again.';
-    });
+        _answeredQuestionsIndex.add(_currentQuestionIndex);
+        _showPointsAnimation('Points increased by 10', Colors.green);
+        _errorMessage = null;
+      });
 
-    await _updateUserPoints();
+      await _updateUserPoints();
 
-    if (isCorrect) {
       if (_questionsAnswered >= _randomizedQuestions.length) {
         _updateUserLevel();
         _showCongratsDialog();
@@ -142,7 +166,42 @@ class _QuizPageState extends State<QuizPage> {
           _setAvailableChoices();
         });
       }
+    } else {
+      setState(() {
+        _points = max(0, _points - 5);
+        _errorMessage = 'Incorrect! Please try again.';
+        _showPointsAnimation('Points decreased by 5', Colors.red);
+      });
+
+      await _updateUserPoints();
     }
+  }
+
+  void _showPointsAnimation(String message, Color color) {
+    setState(() {
+      _pointChangeMessage = message; // Update the message
+      _pointChangeColor = color; // Update the color based on increase/decrease
+      _isPointChangeVisible = true;   // Show the change message
+    });
+
+    // Hide the message after 2 seconds, then show current points
+    Future.delayed(Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isPointChangeVisible = false; // Hide the change message
+        });
+
+        // After hiding, show current points
+        Future.delayed(Duration(milliseconds: 300), () {
+          if (mounted) {
+            setState(() {
+              _pointChangeMessage = 'Current Points: $_points'; // Show current points
+              _isPointChangeVisible = true; // Show current points
+            });
+          }
+        });
+      }
+    });
   }
 
   Future<void> _updateUserPoints() async {
@@ -206,24 +265,25 @@ class _QuizPageState extends State<QuizPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(
-              child: Text('Congratulations!',
-                  style: TextStyle(color: Colors.black))),
-          content: Center(
-            child: SizedBox(
-              // Prevent overflow by adding constraints
-              width: 250, // Limit the width to prevent overflow
-              child: Text(
-                'You have completed the quiz. Final points: $_points',
-                style: TextStyle(
-                    color: Colors.black, fontSize: 16), // Reduce font size
-                textAlign: TextAlign.center,
-              ),
+          title: Text(
+            'Congratulations!',
+            style: TextStyle(color: Colors.black),
+            textAlign: TextAlign.center,
+          ),
+          content: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Text(
+              'You have completed the quiz. Final points: $_points',
+              style: TextStyle(color: Colors.black, fontSize: 14),
+              textAlign: TextAlign.center,
             ),
           ),
           actions: [
             TextButton(
-              child: Text('OK', style: TextStyle(color: Colors.black)),
+              child: Text(
+                'OK',
+                style: TextStyle(color: Colors.black),
+              ),
               onPressed: () {
                 Navigator.pushReplacementNamed(context, '/home',
                     arguments: {'username': _username, 'userData': userData});
@@ -235,15 +295,38 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
+  Widget _buildPointsDisplay() {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      height: 50,
+      color: _isPointChangeVisible ? _pointChangeColor : Colors.deepPurple, // Violet/green/red background
+      curve: Curves.easeInOut,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.monetization_on, color: Colors.white),
+          SizedBox(width: 8),
+          Text(
+            _pointChangeMessage.isEmpty
+                ? 'Current Points: $_points'
+                : _pointChangeMessage,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildQuestionWidget() {
     if (_randomizedQuestions.isEmpty) {
       return Center(child: Text('No questions available for this difficulty.'));
     }
 
     final currentQuestion = _randomizedQuestions[_currentQuestionIndex];
-    if (currentQuestion == null) {
-      return Center(child: Text('Error: Current question is null.'));
-    }
 
     return Card(
       elevation: 5,
@@ -261,7 +344,7 @@ class _QuizPageState extends State<QuizPage> {
               _difficulty == 'Easy'
                   ? 'Select the correct Kapampangan word for each image'
                   : currentQuestion.question ??
-                      'Error: Question text is missing.',
+                  'Error: Question text is missing.',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 20,
@@ -328,7 +411,7 @@ class _QuizPageState extends State<QuizPage> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor:
-                  isSelected ? Colors.deepPurple : Color(0xFFB7A6E0),
+              isSelected ? Colors.deepPurple : Color(0xFFB7A6E0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
@@ -364,8 +447,8 @@ class _QuizPageState extends State<QuizPage> {
         onPressed: _difficulty == 'Hard'
             ? () => _checkAnswer(_answerController.text)
             : (_selectedChoiceIndex != null
-                ? () => _checkAnswer(_availableChoices[_selectedChoiceIndex!])
-                : null),
+            ? () => _checkAnswer(_availableChoices[_selectedChoiceIndex!])
+            : null),
         child: Text(
           'Submit',
           style: TextStyle(
@@ -382,23 +465,20 @@ class _QuizPageState extends State<QuizPage> {
       height: 20,
       child: _errorMessage != null
           ? Center(
-              // Centering the error message
-              child: Container(
-                constraints: BoxConstraints(
-                    maxWidth: 300), // Limit max width to prevent overflow
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                decoration: BoxDecoration(
-                  color: Colors.redAccent,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  _errorMessage!,
-                  style: TextStyle(
-                      color: Colors.white, fontSize: 16), // Reduced font size
-                  textAlign: TextAlign.center, // Center the text
-                ),
-              ),
-            )
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 300),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          decoration: BoxDecoration(
+            color: Colors.redAccent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            _errorMessage!,
+            style: TextStyle(color: Colors.white, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      )
           : SizedBox.shrink(),
     );
   }
@@ -425,31 +505,22 @@ class _QuizPageState extends State<QuizPage> {
         ),
       ),
       body: SafeArea(
-        child: _randomizedQuestions.isEmpty
-            ? Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  LinearProgressIndicator(value: _progress / 100),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Points: $_points',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+        child: Column(
+          children: [
+            _buildPointsDisplay(), // Persistent points display
+            LinearProgressIndicator(value: _progress / 100),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: _buildQuestionWidget(),
                   ),
-                  Expanded(
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: _buildQuestionWidget(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
