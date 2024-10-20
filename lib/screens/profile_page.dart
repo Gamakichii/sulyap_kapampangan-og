@@ -465,7 +465,7 @@ class _ProfilePageState extends State<ProfilePage>
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: color ?? const Color(0xFF6A4C93), // Default color
+          backgroundColor: color ?? const Color(0xFFB7A6E0), // Default color
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),

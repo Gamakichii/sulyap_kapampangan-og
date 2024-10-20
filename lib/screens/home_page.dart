@@ -195,7 +195,7 @@ class HomePage extends StatelessWidget {
           : null,
       style: ElevatedButton.styleFrom(
         backgroundColor: isUnlocked
-            ? const Color(0xFFB58DB6)
+            ? const Color(0xFFB7A6E0)
             : Colors.grey[400],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
