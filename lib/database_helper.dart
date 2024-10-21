@@ -97,8 +97,8 @@ class DatabaseHelper {
               'assets/easy_mode_images/ebun.png', // Update with the actual image path
         ),
         QuizQuestion(
-          choices: ['Matuling', 'Maputi', 'Kupia', 'Malutu'],
-          correctAnswer: 'Kupia',
+          choices: ['Matuling', 'Maputi', 'Kupya', 'Malutu'],
+          correctAnswer: 'Kupya',
           difficulty: 'Easy',
           imagePath:
               'assets/easy_mode_images/kupia.png', // Update with the actual image path
@@ -153,8 +153,8 @@ class DatabaseHelper {
               'assets/easy_mode_images/matuling.png', // Update with the actual image path
         ),
         QuizQuestion(
-          choices: ['Matua', 'Anak', 'Pengari', 'Kapatad'],
-          correctAnswer: 'Matua',
+          choices: ['Matwa', 'Anak', 'Pengari', 'Kapatad'],
+          correctAnswer: 'Matwa',
           difficulty: 'Easy',
           imagePath:
               'assets/easy_mode_images/matua.png', // Update with the actual image path
@@ -296,11 +296,11 @@ class DatabaseHelper {
           question: 'I like this food.',
           choices: [
             'Manyaman ya ing pamangan.',
-            'Buri ke ining pamangan.',
+            'Buri ke ing pamangan.',
             'Mengan na ku.',
             'Ali ku buri ining pamangan.'
           ],
-          correctAnswer: 'Buri ke ining pamangan.',
+          correctAnswer: 'Buri ke ing pamangan.',
           difficulty: 'Medium',
         ),
 
@@ -367,17 +367,17 @@ class DatabaseHelper {
         QuizQuestion(
           question: 'Can you help me?',
           choices: [
-            'Malyari mu ku saupan?',
+            'Malyari mu kung sopan?',
             'Nanung oras na?',
             'Mayap a gatpanapun!',
             'Nanu ing buri mu?'
           ],
-          correctAnswer: 'Malyari mu ku saupan?',
+          correctAnswer: 'Malyari mu kung sopan?',
           difficulty: 'Medium',
         ),
 
         QuizQuestion(
-          question: "I'm sorry.",
+          question: "Sorry.",
           choices: [
             'Mayap a abak!',
             'Pasensya.',
@@ -435,11 +435,11 @@ class DatabaseHelper {
           question: "Do you speak English?",
           choices: [
             'Makananu ka?',
-            'Byasa ka mag-Ingles?',
+            'Magsalita kang Ingles?',
             'Nanung lagyu mu?',
             'Nokarin ka manuknangan?'
           ],
-          correctAnswer: 'Byasa ka mag-Ingles?',
+          correctAnswer: 'Magsalita kang Ingles?',
           difficulty: 'Medium',
         ),
 
@@ -458,12 +458,12 @@ class DatabaseHelper {
         QuizQuestion(
           question: "I don't know.",
           choices: [
-            'Ali ku balu.',
+            'Ali ke balu.',
             'Salamat pu.',
             'Mayap a aldo.',
             'Mako na ku.'
           ],
-          correctAnswer: 'Ali ku balu.',
+          correctAnswer: 'Ali ke balu.',
           difficulty: 'Medium',
         ),
 
@@ -482,19 +482,19 @@ class DatabaseHelper {
         QuizQuestion(
           question: "What's your favorite food?",
           choices: [
-            'Nanu ing paborito mung pamangan?',
+            'Nanu ya ing paburitu mung pamangan?',
             'Nanung oras na?',
             'Nokarin ka munta?',
             'Pilan ka banua?'
           ],
-          correctAnswer: 'Nanu ing paborito mung pamangan?',
+          correctAnswer: 'Nanu ya ing paburitu mung pamangan?',
           difficulty: 'Medium',
         ),
 
         QuizQuestion(
           question: "I'm thirsty.",
-          choices: ['Mapagal ku.', 'Mako na ku.', 'Mau ku.', 'Maranup ku.'],
-          correctAnswer: 'Mau ku.',
+          choices: ['Mapagal ku.', 'Mako na ku.', 'Mawa ku.', 'Maranup ku.'],
+          correctAnswer: 'Mawa ku.',
           difficulty: 'Medium',
         ),
 
@@ -525,12 +525,12 @@ class DatabaseHelper {
         QuizQuestion(
           question: "Happy New Year!",
           choices: [
-            'Masayang Bayung Banua!',
+            'Masaplalang Bayung Banwa!',
             'Mayap a kebaitan!',
             'Salamat pu!',
             'Pasensya.'
           ],
-          correctAnswer: 'Masayang Bayung Banua!',
+          correctAnswer: 'Masaplalang Bayung Banwa!',
           difficulty: 'Medium',
         ),
 
@@ -557,13 +557,13 @@ class DatabaseHelper {
         QuizQuestion(
           question:
               "Ing kapatad ku (bought/bumili) _______ yang bayung sapatus.",
-          correctAnswer: 'sinali ',
+          correctAnswer: 'sinali',
           difficulty: 'Hard',
         ),
 
         QuizQuestion(
-          question: "(Tired/Pagod) _______ naku kaibat ning malyaring obra.",
-          correctAnswer: 'malugud ',
+          question: "(Tired/Pagod) _______ naku kaibat ning milyaring obra.",
+          correctAnswer: 'mapagal',
           difficulty: 'Hard',
         ),
 
@@ -604,14 +604,14 @@ class DatabaseHelper {
         ),
 
         QuizQuestion(
-          question: "Malagad kong mangan (vegetables/gulay) __________.",
+          question: "Malagad kung mangan (vegetables/gulay) __________.",
           correctAnswer: 'gule',
           difficulty: 'Hard',
         ),
 
         QuizQuestion(
           question:
-              "Masarap ya ing (food/pagkain) __________ king piestang iti.",
+              "Manyaman ya ing (food/pagkain) __________ king piestang iti.",
           correctAnswer: 'pamangan',
           difficulty: 'Hard',
         ),
@@ -659,7 +659,7 @@ class DatabaseHelper {
         ),
 
         QuizQuestion(
-          question: "Matua ne ing (grandfather/lolo) __________ ku.",
+          question: "Matwa ne ing (grandmother/lola) __________ ku.",
           correctAnswer: 'apu',
           difficulty: 'Hard',
         ),
@@ -695,7 +695,7 @@ class DatabaseHelper {
         ),
 
         QuizQuestion(
-          question: "Masiksik la reng (people/tao) __________ king palengki.",
+          question: "Sobra la dakal reng (people/tao) __________ king palengki.",
           correctAnswer: 'tau',
           difficulty: 'Hard',
         ),
