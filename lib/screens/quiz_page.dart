@@ -456,7 +456,7 @@ class _QuizPageState extends State<QuizPage> {
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.symmetric(vertical: 15),
           backgroundColor: _difficulty == 'Hard' || _selectedChoiceIndex != null
-              ? Color(0xFFB7A6E0)
+              ? Colors.deepPurple
               : Colors.grey,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
